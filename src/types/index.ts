@@ -1,4 +1,4 @@
-interface IProductItem {
+export interface IProductItem {
   id: string;
   description: string;
   image: string;
@@ -12,14 +12,24 @@ interface IBasket {
 	total: number;
 }
 
-type PaymentMethod = 'cash' | 'card';
+export type PaymentMethod = 'cash' | 'card';
 
-interface IOrder {
+export interface IOrder {
 	payment: PaymentMethod;
 	email: string;
 	phone: string;
 	address: string;
-	items: string[];
 	total: number;
+	items: string[];
+	id: string;
 }
 
+export interface IProductList {
+	total: number;
+	items: 	IProductItem[];
+	getProduct(productId: string): IProductItem;
+}
+
+export type TOrderResult = Pick<IOrder, 'id' | 'total'>;
+export type TPaymentForm = Pick<IOrder, 'payment' | 'address'>;
+export type TContactForm = Pick<IOrder, 'email' | 'phone'>;
