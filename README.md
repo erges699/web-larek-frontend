@@ -59,7 +59,7 @@ interface IProductItem {
 
 ```
 interface IBasket {
-	items: Map<string, number>;
+	items: string[];
 	total: number;
 }
 ```
@@ -87,10 +87,35 @@ interface IOrder {
 Список товаров на главной странице
 
 ```
-interface IProductList {
+interface IProductData {
 	total: number;
 	items: 	IProductItem[];
+	preview: IProductItem | null;
+	getProduct(productId: string): IProductItem;
+	setProductList(items: IProductItem[]): void;
+	setPreview(item: IProductItem): void;
 }
+```
+
+Корзина и заказ
+
+```
+interface IOrderData {
+	basket: IBasket;
+	order: TOrder;
+	isInBasket(item: IProductItem): IProductItem;
+	addToBasket(item: IProductItem): void;
+	removeFromBasket(item: IProductItem): void;
+	clearBasket(): void;
+	setOrderPayment(method: PaymentMethod): void;
+	clearOrder(): void;
+	checkPaymentValidation(data: Record<keyof TPaymentForm, string>): boolean;
+	checkContactValidation(data: Record<keyof TContactForm, string>): boolean;
+}
+```
+
+```
+export type TOrder = Omit<IOrder, 'id' | 'items' | 'total'>;
 ```
 
 Результат покупки
@@ -143,5 +168,37 @@ type TContactForm = Pick<IOrder, 'email' | 'phone'>;
 
 ### Описание данных
 
-#### Класс 
+#### Класс ProductsData
+Класс отвечает за хранение и логику работы с данными товаров.\
+Конструктор класса принимает инстант брокера событий.\
+В полях класса хранятся следующие данные:
+- `total: number` - общее количество товаров (передаётся сервером);
+- `items: 	IProductItem[]` - массив объектов товаров;
+- `preview: IProductItem | null` - id товара, выбранного для просмотра в модальном окне;
+
+Класс предоставляет набор методов для взаимодействия с этими данными:
+
+- `getProduct(productId: string): IProductItem` - возвращает id товара;
+- `setProductList(items: IProductItem[]): void` - устанавливает список товаров;
+- `setPreview(item: IProductItem): void` - устанавливает id товара для просмотра в модальном окне;
+
+
+#### Класс OrderData
+Класс отвечает за хранение и логику работы с данными корзины и заказа.\
+Конструктор класса принимает инстант брокера событий.\
+В полях класса хранятся следующие данные:
+- `basket: IBasket` - корзина;
+- `order: TOrder` - заказ;
+
+Класс предоставляет набор методов для взаимодействия с этими данными:
+
+- `getIsInBasket(item: IProductItem): IProductItem` - возвращает id товара из корзины;
+- `addToBasket(item: IProductItem): void` - добавляет товар в корзину;
+- `removeFromBasket(item: IProductItem): void` - удаляет товар из корзины;
+- `clearBasket(): void` - очищает корзину;
+- `setOrderPayment(method: PaymentMethod): void` - устанавливает метод оплаты;
+- `clearOrder(): void` - очищает заказ;
+- `checkPaymentValidation(data: Record<keyof TPaymentForm, string>): boolean` - проверяет данные оплаты (метод оплаты и адрес) на валидность;
+- `checkContactValidation(data: Record<keyof TContactForm, string>): boolean` - проверяет на валидность данные контактов;
+
 
