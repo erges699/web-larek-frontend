@@ -114,6 +114,8 @@ interface IOrderData {
 }
 ```
 
+Заказ
+
 ```
 export type TOrder = Omit<IOrder, 'id' | 'items' | 'total'>;
 ```
@@ -173,7 +175,7 @@ type TContactForm = Pick<IOrder, 'email' | 'phone'>;
 Конструктор класса принимает инстант брокера событий.\
 В полях класса хранятся следующие данные:
 - `total: number` - общее количество товаров (передаётся сервером);
-- `items: 	IProductItem[]` - массив объектов товаров;
+- `items: IProductItem[]` - массив объектов товаров;
 - `preview: IProductItem | null` - id товара, выбранного для просмотра в модальном окне;
 
 Класс предоставляет набор методов для взаимодействия с этими данными:
