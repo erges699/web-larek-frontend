@@ -174,7 +174,6 @@ type TContactForm = Pick<IOrder, 'email' | 'phone'>;
 Класс отвечает за хранение и логику работы с данными товаров.\
 Конструктор класса принимает инстант брокера событий.\
 В полях класса хранятся следующие данные:
-- `total: number` - общее количество товаров (передаётся сервером);
 - `items: IProductItem[]` - массив объектов товаров;
 - `preview: IProductItem | null` - id товара, выбранного для просмотра в модальном окне;
 
@@ -190,17 +189,18 @@ type TContactForm = Pick<IOrder, 'email' | 'phone'>;
 Конструктор класса принимает инстант брокера событий.\
 В полях класса хранятся следующие данные:
 - `basket: IBasket` - корзина;
-- `order: TOrder` - заказ;
+- `order: TOrder` - платежная и контактная часть заказа (без id, items, total);
 
 Класс предоставляет набор методов для взаимодействия с этими данными:
 
-- `getIsInBasket(item: IProductItem): IProductItem` - возвращает id товара из корзины;
+- `isInBasket(item: IProductItem): boolean` - для проверки есть ли товар в корзине;
 - `addToBasket(item: IProductItem): void` - добавляет товар в корзину;
 - `removeFromBasket(item: IProductItem): void` - удаляет товар из корзины;
 - `clearBasket(): void` - очищает корзину;
-- `setOrderPayment(method: PaymentMethod): void` - устанавливает метод оплаты;
+- `createOrderToPost(): IOrder` - создаёт полный заказ для отправки на сервер (берёт данные из basket и order);
+- `setOrderField(): void` - устанавливает поле формы;
 - `clearOrder(): void` - очищает заказ;
-- `checkPaymentValidation(data: Record<keyof TPaymentForm, string>): boolean` - проверяет данные оплаты (метод оплаты и адрес) на валидность;
-- `checkContactValidation(data: Record<keyof TContactForm, string>): boolean` - проверяет на валидность данные контактов;
+- `checkFormFieldValidation(): boolean` - проверяет данные поля формы после ввода на валидность;
 
+### Классы представления
 

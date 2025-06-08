@@ -25,7 +25,6 @@ export interface IOrder {
 }
 
 export interface IProductData {
-	total: number;
 	items: 	IProductItem[];
 	preview: IProductItem | null;
 	getProduct(productId: string): IProductItem;
@@ -36,14 +35,14 @@ export interface IProductData {
 export interface IOrderData {
 	basket: IBasket;
 	order: TOrder;
-	getIsInBasket(item: IProductItem): IProductItem;
+	isInBasket(item: IProductItem): boolean;
 	addToBasket(item: IProductItem): void;
 	removeFromBasket(item: IProductItem): void;
 	clearBasket(): void;
-	setOrderPayment(method: PaymentMethod): void;
+	createOrderToPost(): IOrder;
+	setOrderField(): void;
 	clearOrder(): void;
-	checkPaymentValidation(data: Record<keyof TPaymentForm, string>): boolean;
-	checkContactValidation(data: Record<keyof TContactForm, string>): boolean;
+	checkFormFieldValidation(): boolean;
 }
 
 export type TOrder = Omit<IOrder, 'id' | 'items' | 'total'>;
