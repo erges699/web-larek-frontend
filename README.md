@@ -175,13 +175,11 @@ type TContactForm = Pick<IOrder, 'email' | 'phone'>;
 Конструктор класса принимает инстант брокера событий.\
 В полях класса хранятся следующие данные:
 - `items: IProductItem[]` - массив объектов товаров;
-- `preview: IProductItem | null` - id товара, выбранного для просмотра в модальном окне;
+- `preview: string | null` - id товара, выбранного для просмотра в модальном окне;
 
 Класс предоставляет набор методов для взаимодействия с этими данными:
 
 - `getProduct(productId: string): IProductItem` - возвращает id товара;
-- `setProductList(items: IProductItem[]): void` - устанавливает список товаров;
-- `setPreview(item: IProductItem): void` - устанавливает id товара для просмотра в модальном окне;
 
 
 #### Класс OrderData

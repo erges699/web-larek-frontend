@@ -7,7 +7,7 @@ export interface IProductItem {
   price: number | null;
 }
 
-interface IBasket {
+export interface IBasket {
 	items: string[];
 	total: number;
 }
@@ -26,10 +26,8 @@ export interface IOrder {
 
 export interface IProductData {
 	items: 	IProductItem[];
-	preview: IProductItem | null;
+	preview: string | null;
 	getProduct(productId: string): IProductItem;
-	setProductList(items: IProductItem[]): void;
-	setPreview(item: IProductItem): void;
 }
 
 export interface IOrderData {
@@ -46,6 +44,17 @@ export interface IOrderData {
 }
 
 export type TOrder = Omit<IOrder, 'id' | 'items' | 'total'>;
+
 export type TOrderResult = Pick<IOrder, 'id' | 'total'>;
+
 export type TPaymentForm = Pick<IOrder, 'payment' | 'address'>;
+
 export type TContactForm = Pick<IOrder, 'email' | 'phone'>;
+
+export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+
+export interface IApi {
+    baseUrl: string;
+    get<T>(uri: string): Promise<T>;
+    post<T>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
+}
