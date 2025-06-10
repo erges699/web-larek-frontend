@@ -1,10 +1,10 @@
-import validate from "validate.js";
+//import validate from "validate.js";
 import { IProductItem, IBasket, PaymentMethod, IOrder, TOrder, TContactForm } from '../types';
 import { IEvents } from './base/events';
 import { constraintsContacts } from '../utils/constants';
 
 export class OrderData {
-    protected i_tems: IProductItem[];
+    protected items: IProductItem[];
     basket: IBasket = {
 		items: [],
 		total: 0,
@@ -72,8 +72,8 @@ export class OrderData {
 
     }
 
-    checkValidation(data: Record<keyof TContactForm, string>) {
-        const isValid = !Boolean(validate(data, constraintsContacts ));
-        return isValid;
-    }
+    //checkValidation(data: Record<keyof TContactForm, string>) {
+    //    const isValid = !Boolean(validate(data, constraintsContacts ));
+    //    return isValid;
+    //}
 } 

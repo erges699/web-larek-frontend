@@ -92,19 +92,34 @@ const testProductsList= [
         }
 ]
 
-const testProductItem = [
-    {
+const testProductItem01 = {
     "id": "854cef69-976d-4c2a-a18c-2aa45046c390",
     "description": "Если планируете решать задачи в тренажёре, берите два.",
     "image": "/5_Dots.svg",
     "title": "+1 час в сутках",
     "category": "софт-скил",
     "price": 750
-    }
-]
+}
+
+const testProductItem02 = {
+    "id": "90973ae5-285c-4b6f-a6d0-65d1d760b102",
+    "description": "Сжимайте мячик, чтобы снизить стресс от тем по бэкенду.",
+    "image": "/Mithosis.svg",
+    "title": "Бэкенд-антистресс",
+    "category": "другое",
+    "price": 1000
+}
 
 productsData.items = testProductsList
 
 console.log(productsData.getProduct("854cef69-976d-4c2a"))
 
 console.log(productsData.getProduct("854cef69-976d-4c2a-a18c-2aa45046c390"))
+
+console.log(orderData.addToBasket(testProductItem01))
+console.log(orderData.isInBasket(testProductItem01))
+console.log(orderData.basket)
+console.log(orderData.addToBasket(testProductItem02))
+console.log(orderData.basket)
+console.log(orderData.clearBasket)
+console.log(orderData.basket)
