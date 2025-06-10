@@ -1,9 +1,9 @@
 //import validate from "validate.js";
-import { IProductItem, IProductData } from "../types";
+import { IProductItem, IProductsData } from "../types";
 import { IEvents } from "./base/events";
 
 
-export class ProductsData implements IProductData{
+export class ProductsData implements IProductsData{
     protected _items: IProductItem[];
     protected _preview: string | null;
     protected events: IEvents;

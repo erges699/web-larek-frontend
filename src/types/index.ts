@@ -24,7 +24,7 @@ export interface IOrder {
 	id: string;
 }
 
-export interface IProductData {
+export interface IProductsData {
 	items: 	IProductItem[];
 	preview: string | null;
 	getProduct(productId: string): IProductItem;
