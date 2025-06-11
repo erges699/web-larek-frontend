@@ -1,66 +1,78 @@
 //import validate from "validate.js";
-import { IProductItem, IBasket, PaymentMethod, IOrder, TOrder, TContactForm } from '../types';
+import { IProductItem, PaymentMethod, TOrder, TContactForm, IOrderData, TFormErrors } from '../types';
 import { IEvents } from './base/events';
-import { constraintsContacts } from '../utils/constants';
+//import { constraintsContacts } from '../utils/constants';
 
-export class OrderData {
-    protected items: IProductItem[];
-    basket: IBasket = {
-		items: [],
-		total: 0,
-	};
-	order: TOrder = {
-		email: '',
-		phone: '',
-		address: '',
-		payment: 'card',
-	};
+export class OrderData implements IOrderData {
+    protected _items: IProductItem[] = [];
+    protected _total: number | null;
+	protected _count: number;
+	protected _order: TOrder;
+	formErrors: TFormErrors;
     protected events: IEvents;
 
 	constructor(events: IEvents) {
 		this.events = events;
 	}
 
+    get items() {
+      return this._items;
+    }
+
+    get total() {
+      return this._total;
+    }
+
+    get count() {
+      return this._count;
+    }
+
+    get order() {
+      return this._order;
+    }
+
     isInBasket(item: IProductItem) {
-        return this.basket.items.includes(item.id);
+        return this._items.includes(item);
     }
 
 	addToBasket(item: IProductItem) {
-        this.basket.items.push(item.id);
-		this.basket.total += item.price;
-		this.events.emit('basket:changed');
+        this._items.push(item);
+		this.events.emit('basket:added');
     }
 
-	removeFromBasket(item: IProductItem) {
-		this.basket.items = this.basket.items.filter((id) => id !== item.id);
-		this.basket.total -= item.price;
-		this.events.emit('basket:changed',);
+	removeFromBasket(productId: string) {
+		this._items = this._items.filter((item) => item.id !== productId);
+		this.events.emit('basket:removed',);
     }
 
 	clearBasket() {
-		this.basket.items = [];
-		this.basket.total = 0;
-		this.events.emit('basket:changed');
+		this._items = [];
+		this.events.emit('basket:cleared');
     }
 
-	createOrderToPost() {
+    countPrices() {
+      this._total = this._items.reduce((sum, item) => sum + (item.price || 0), 0);
+      this.events.emit('basket:changed');
+    }
 
+    countBasketAmount() {
+      this._count = this._items.length;
     }
 
 	setPayment(method: PaymentMethod) {
-		this.order.payment = method;
+		this._order.payment = method;
 	}
 
 	setOrderField(field: keyof TOrder, value: string) {
 		if (field === 'payment') {
 			this.setPayment(value as PaymentMethod);
 		} else {
-			this.order[field] = value;
+			this._order[field] = value;
 		}
 	}
 
 	clearOrder() {
-		this.order = {
+		this._order = {
 			email: '',
 			phone: '',
 			address: '',
@@ -68,12 +80,34 @@ export class OrderData {
 		};
 	}
 
-	checkFormFieldValidation() {
-
+	createOrderToPost() {
+		this.events.emit('order:submit', this._order);
     }
 
-    //checkValidation(data: Record<keyof TContactForm, string>) {
-    //    const isValid = !Boolean(validate(data, constraintsContacts ));
-    //    return isValid;
-    //}
-} 
+	checkFormFieldValidation() {
+      const errors: typeof this.formErrors = {
+        payment: "",
+        address: "",
+        email: "",
+        phone: ""
+      };
+
+      if (!this._order.address) {
+        errors.address = 'Некорректный адрес';
+      }
+
+      if (!this._order.email) {
+        errors.email = 'Некорректный адрес эл.почты';
+      }
+
+      if (!this._order.phone) {
+        errors.phone = 'Некорректный номер телефона';
+      }
+
+      this.formErrors = errors;
+      this.events.emit('order:changed', this.formErrors);
+
+      return Object.keys(errors).length === 0;
+    }
+
+}

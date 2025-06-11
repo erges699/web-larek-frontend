@@ -44,7 +44,7 @@ yarn build
 
 Продукт
 
-```
+```typescript
 interface IProductItem {
   id: string;
   description: string;
@@ -57,7 +57,7 @@ interface IProductItem {
 
 Корзина
 
-```
+```typescript
 interface IBasket {
 	items: string[];
 	total: number;
@@ -66,13 +66,13 @@ interface IBasket {
 
 Метод оплаты
 
-```
+```typescript
 type PaymentMethod = 'cash' | 'card'
 ```
 
 Заказ
 
-```
+```typescript
 interface IOrder {
 	payment: PaymentMethod;
 	email: string;
@@ -86,20 +86,17 @@ interface IOrder {
 
 Список товаров на главной странице
 
-```
-interface IProductData {
-	total: number;
+```typescript
+interface IProductsData {
 	items: 	IProductItem[];
-	preview: IProductItem | null;
+	preview: string | null;
 	getProduct(productId: string): IProductItem;
-	setProductList(items: IProductItem[]): void;
-	setPreview(item: IProductItem): void;
 }
 ```
 
 Корзина и заказ
 
-```
+```typescript
 interface IOrderData {
 	basket: IBasket;
 	order: TOrder;
@@ -116,25 +113,25 @@ interface IOrderData {
 
 Заказ
 
-```
+```typescript
 export type TOrder = Omit<IOrder, 'id' | 'items' | 'total'>;
 ```
 
 Результат покупки
 
-```
+```typescript
 type TOrderResult = Pick<IOrder, 'id' | 'total'>;
 ```
 
 Форма выбора способа оплаты и ввода адреса доставки
 
-```
+```typescript
 type TPaymentForm = Pick<IOrder, 'payment' | 'address'>;
 ```
 
 Форма ввода адреса эл.почты и номера телефона
 
-```
+```typescript
 type TContactForm = Pick<IOrder, 'email' | 'phone'>;
 ```
 
@@ -231,6 +228,19 @@ type TContactForm = Pick<IOrder, 'email' | 'phone'>;
 - `hideInputError (field: string): void` - очищает текст ошибки под указанным полем ввода
 - `close (): void` - расширяет родительский метод дополнительно при закрытии очищая поля формы и деактивируя кнопку сохранения
 - `get form: HTMLElement` - геттер для получения элемента формы
+
+
+#### Класс Card
+Отвечает за отображение карточки, задавая в карточке данные названия, изображения, количества лайков, наличия лайка текущего пользователя. Класс используется для отображения карточек на странице сайта. В конструктор класса передается DOM элемент темплейта, что позволяет при необходимости формировать карточки разных вариантов верстки. В классе устанавливаются слушатели на все интерактивные элементы, в результате взаимодействия с которыми пользователя генерируются соответствующие события.\
+Поля класса содержат элементы разметки элементов карточки. Конструктор, кроме темплейта принимает экземпляр `EventEmitter` для инициации событий.\
+Методы:
+- render(cardData: Partial<ICard>, userId: string): HTMLElement - заполняет атрибуты элементов карточки данными, а так-же управляет отображением корзины удаления на основании данных о текущем пользователе. Корзина удаления будет отображаться только если создатель карточки текущий пользователь. Метод возвращает разметку карточки с установленными слушателями. Слушатели устанавливаются на все интерактивные элементы карточки и генерируют соответствующие события через экземпляр брокера событий.
+- isLiked(): boolean - метод возвращает наличие на карточке лайка текущего пользователя
+- deleteCard(): void - метод для удаления разметки карточки
+- геттер _id возвращает уникальный id карточки
+
+#### Класс CardsContainer
+Отвечает за отображение блока с карточками на главной странице. Предоставляет метод `addCard(cardElement: HTMLElement)` для добавления карточек на страницу и сеттер `container` для полного обновления содержимого. В конструктор принимает контейнер, в котором размещаются карточки.
 
 ### Слой коммуникации
 
