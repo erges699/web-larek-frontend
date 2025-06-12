@@ -21,18 +21,18 @@ export class ProductsData implements IProductsData{
         return this._items;
     }
 
-    getProduct(productId: string): IProductItem {
-        return this.items.find((item) => item.id === productId);
+    getProduct(itemId: string) {
+        return this._items.find((item) => item.id === itemId);
     };
 
-    set preview(productId: string | null) {
-        if (!productId) {
+    set preview(itemId: string | null) {
+        if (!itemId) {
             this._preview = null;
             return;
         }
-        const selectedCard = this.getProduct(productId);
+        const selectedCard = this.getProduct(itemId);
         if (selectedCard) {
-            this._preview = productId;
+            this._preview = itemId;
             this.events.emit('product:selected')
         }    
     };

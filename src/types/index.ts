@@ -7,11 +7,6 @@ export interface IProductItem {
   price: number | null;
 }
 
-//export interface IBasket {
-//	items: string[];
-//	total: number;
-//}
-
 export type PaymentMethod = 'cash' | 'card';
 
 export interface IOrder {
@@ -22,6 +17,11 @@ export interface IOrder {
 	total: number;
 	items: string[];
 	id: string;
+}
+
+export interface IOrderResult {
+	id: string;
+	total: number;
 }
 
 export interface IProductsData {
@@ -47,10 +47,6 @@ export interface IOrderData {
 }
 
 export type TOrder = Omit<IOrder, 'id' | 'items' | 'total'>;
-
-export type TOrderCreate = Omit<IOrder, 'id' >;
-
-export type TOrderResult = Pick<IOrder, 'id' | 'total'>;
 
 export type TPaymentForm = Pick<IOrder, 'payment' | 'address'>;
 

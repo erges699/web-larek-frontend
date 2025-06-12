@@ -80,7 +80,15 @@ interface IOrder {
 	address: string;
 	total: number;
 	items: string[];
+}
+```
+
+Результат покупки
+
+```typescript
+export interface IOrderResult {
 	id: string;
+	total: number;
 }
 ```
 
@@ -114,13 +122,7 @@ interface IOrderData {
 Заказ
 
 ```typescript
-export type TOrder = Omit<IOrder, 'id' | 'items' | 'total'>;
-```
-
-Результат покупки
-
-```typescript
-type TOrderResult = Pick<IOrder, 'id' | 'total'>;
+export type TOrder = Omit<IOrder, 'items' | 'total'>;
 ```
 
 Форма выбора способа оплаты и ввода адреса доставки
