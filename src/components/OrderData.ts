@@ -4,110 +4,110 @@ import { IEvents } from './base/events';
 //import { constraintsContacts } from '../utils/constants';
 
 export class OrderData implements IOrderData {
-    protected _items: IProductItem[] = [];
-    protected _total: number | null;
-	protected _count: number;
-	protected _order: TOrder;
-	formErrors: TFormErrors;
-    protected events: IEvents;
+  protected _items: IProductItem[] = [];
+  protected _total: number | null;
+  protected _count: number;
+  protected _order: TOrder;
+  protected events: IEvents;
+  formErrors: TFormErrors;
 
-	constructor(events: IEvents) {
-		this.events = events;
-	}
+  constructor(events: IEvents) {
+    this.events = events;
+  }
 
-    get items() {
-      return this._items;
+  get items() {
+    return this._items;
+  }
+
+  get total() {
+    return this._total;
+  }
+
+  get count() {
+    return this._count;
+  }
+
+  get order() {
+    return this._order;
+  }
+
+  isInBasket(item: IProductItem) {
+    return this._items.includes(item);
+  }
+
+  addToBasket(item: IProductItem) {
+    this._items.push(item);
+    this.events.emit('basket:added');
     }
 
-    get total() {
-      return this._total;
+  removeFromBasket(productId: string) {
+    this._items = this._items.filter((item) => item.id !== productId);
+    this.events.emit('basket:removed',);
     }
 
-    get count() {
-      return this._count;
+  clearBasket() {
+    this._items = [];
+    this.events.emit('basket:cleared');
     }
 
-    get order() {
-      return this._order;
+  countPrices() {
+    this._total = this._items.reduce((sum, item) => sum + (item.price || 0), 0);
+    this.events.emit('basket:changed');
+  }
+
+  countBasketAmount() {
+    this._count = this._items.length;
+  }
+
+  setPayment(method: PaymentMethod) {
+    this._order.payment = method;
+  }
+
+  setOrderField(field: keyof TOrder, value: string) {
+    if (field === 'payment') {
+      this.setPayment(value as PaymentMethod);
+    } else {
+      this._order[field] = value;
+    }
+  }
+
+  clearOrder() {
+    this._order = {
+      email: '',
+      phone: '',
+      address: '',
+      payment: 'card',
+    };
+  }
+
+  createOrderToPost() {
+    this.events.emit('order:submit', this._order);
     }
 
-    isInBasket(item: IProductItem) {
-        return this._items.includes(item);
+  checkFormFieldValidation() {
+    const errors: typeof this.formErrors = {
+      payment: "",
+      address: "",
+      email: "",
+      phone: ""
+    };
+
+    if (!this._order.address) {
+      errors.address = 'Некорректный адрес';
     }
 
-	addToBasket(item: IProductItem) {
-        this._items.push(item);
-		this.events.emit('basket:added');
+    if (!this._order.email) {
+      errors.email = 'Некорректный адрес эл.почты';
     }
 
-	removeFromBasket(productId: string) {
-		this._items = this._items.filter((item) => item.id !== productId);
-		this.events.emit('basket:removed',);
+    if (!this._order.phone) {
+      errors.phone = 'Некорректный номер телефона';
     }
 
-	clearBasket() {
-		this._items = [];
-		this.events.emit('basket:cleared');
-    }
+    this.formErrors = errors;
+    this.events.emit('order:changed', this.formErrors);
 
-    countPrices() {
-      this._total = this._items.reduce((sum, item) => sum + (item.price || 0), 0);
-      this.events.emit('basket:changed');
-    }
-
-    countBasketAmount() {
-      this._count = this._items.length;
-    }
-
-	setPayment(method: PaymentMethod) {
-		this._order.payment = method;
-	}
-
-	setOrderField(field: keyof TOrder, value: string) {
-		if (field === 'payment') {
-			this.setPayment(value as PaymentMethod);
-		} else {
-			this._order[field] = value;
-		}
-	}
-
-	clearOrder() {
-		this._order = {
-			email: '',
-			phone: '',
-			address: '',
-			payment: 'card',
-		};
-	}
-
-	createOrderToPost() {
-		this.events.emit('order:submit', this._order);
-    }
-
-	checkFormFieldValidation() {
-      const errors: typeof this.formErrors = {
-        payment: "",
-        address: "",
-        email: "",
-        phone: ""
-      };
-
-      if (!this._order.address) {
-        errors.address = 'Некорректный адрес';
-      }
-
-      if (!this._order.email) {
-        errors.email = 'Некорректный адрес эл.почты';
-      }
-
-      if (!this._order.phone) {
-        errors.phone = 'Некорректный номер телефона';
-      }
-
-      this.formErrors = errors;
-      this.events.emit('order:changed', this.formErrors);
-
-      return Object.keys(errors).length === 0;
-    }
+    return Object.keys(errors).length === 0;
+  }
 
 }

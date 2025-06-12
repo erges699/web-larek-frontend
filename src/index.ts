@@ -2,9 +2,16 @@ import './scss/styles.scss';
 import { ProductsData } from './components/ProductsData';
 import { OrderData } from './components/OrderData';
 import { EventEmitter, IEvents } from './components/base/events';
+import { IApi } from './types';
+import { Api } from './components/base/api';
+import { API_URL, settings } from './utils/constants';
+import { AppAPI } from './components/AppApi';
 
 
 const events: IEvents = new EventEmitter();
+
+const baseApi: IApi = new Api(API_URL, settings);
+const api = new AppAPI(baseApi);
 
 const productsData = new ProductsData(events);
 const orderData = new OrderData(events);
@@ -117,9 +124,12 @@ console.log(productsData.getProduct("854cef69-976d-4c2a"))
 console.log(productsData.getProduct("854cef69-976d-4c2a-a18c-2aa45046c390"))
 
 console.log(orderData.addToBasket(testProductItem01))
-console.log(orderData.isInBasket(testProductItem01))
-console.log(orderData.basket)
-console.log(orderData.addToBasket(testProductItem02))
-console.log(orderData.basket)
-console.log(orderData.clearBasket)
-console.log(orderData.basket)
+//console.log(orderData.addToBasket(testProductItem02))
+//console.log(orderData.isInBasket(testProductItem01))
+//console.log(orderData.countBasketAmount)
+//console.log(orderData.countPrices)
+//console.log(orderData.removeFromBasket("854cef69-976d-4c2a-a18c-2aa45046c390"))
+//console.log(orderData._total)
+
+//Promise.all([api.getCards])
+//    .then()

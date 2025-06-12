@@ -48,6 +48,8 @@ export interface IOrderData {
 
 export type TOrder = Omit<IOrder, 'id' | 'items' | 'total'>;
 
+export type TOrderCreate = Omit<IOrder, 'id' >;
+
 export type TOrderResult = Pick<IOrder, 'id' | 'total'>;
 
 export type TPaymentForm = Pick<IOrder, 'payment' | 'address'>;
@@ -56,7 +58,7 @@ export type TContactForm = Pick<IOrder, 'email' | 'phone'>;
 
 export type TFormErrors = Record<keyof TPaymentForm | keyof TContactForm, string>;
 
-export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
 export interface IApi {
     baseUrl: string;
