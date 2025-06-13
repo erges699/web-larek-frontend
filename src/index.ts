@@ -5,6 +5,7 @@ import { EventEmitter, IEvents } from './components/base/events';
 import { IApi } from './types';
 import { Api } from './components/base/api';
 import { API_URL, CDN_URL, settings } from './utils/constants';
+import { testOrder01, testProductItem01, testProductsList } from './utils/constantsTest';
 import { AppAPI } from './components/AppApi';
 
 
@@ -21,30 +22,12 @@ events.onAll((event) => {
 })
 
 
-//productsData.items = testProductsList.items
-//console.log(productsData.items);
-//console.log(productsData.getProduct("854cef69-976d-4c2a"))
-//console.log(orderData.addToBasket(testProductItem02))
-
-//console.log(orderData.countBasketAmount)
-//console.log(orderData.countPrices)
-//console.log(orderData.removeFromBasket("854cef69-976d-4c2a-a18c-2aa45046c390"))
-//console.log(orderData._total)
-
 Promise.all([api.getProductList()])
     .then(([productList]) => {
         productsData.items = productList;
-        //console.log(productsData.items);
-        //console.log(productsData.getProduct("854cef69-976d-4c2a-a18c-2aa45046c390"));
+
         events.emit('initialData:loaded');
     })
     .catch((err) => {
 		console.error(err);
 	});
-
-    //, api.getProduct("1c521d84-c48d-48fa-8cfb-9d911fa515fd")
-    //, productItem
-//        console.log(productItem);
-
-//console.log(orderData.addToBasket("854cef69-976d-4c2a-a18c-2aa45046c390"))
-//console.log(productsData.items);

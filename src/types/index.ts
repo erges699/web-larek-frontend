@@ -10,17 +10,17 @@ export interface IProductItem {
 export type PaymentMethod = 'cash' | 'card';
 
 export interface IOrder {
-	payment: PaymentMethod;
+	payment: string;
 	email: string;
 	phone: string;
 	address: string;
 	total: number;
 	items: string[];
-	id: string;
+	id?: string;
 }
 
 export interface IOrderResult {
-	id: string;
+	id?: string;
 	total: number;
 }
 

@@ -5,6 +5,14 @@ export const settings = {
 
 };
 
+export const categories = new Map([
+  ['софт-скил', 'soft'],
+  ['другое', 'other'],
+  ['дополнительное', 'additional'],
+  ['кнопка', 'button'],
+  ['хард-скил', 'hard']
+]);
+
 export const constraintsContacts = {
 	email: {
 		presence: { message: '^Поле не может быть пустым', allowEmpty: false },

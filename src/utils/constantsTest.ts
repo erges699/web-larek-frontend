@@ -101,3 +101,46 @@ export const testProductItem02 = {
     "category": "другое",
     "price": 1000
 }
+
+export const testOrder01 = {
+    "payment": "online",
+    "email": "test@test.ru",
+    "phone": "+71234567890",
+    "address": "Spb Vosstania 1",
+    "total": 2200,
+    "items": [
+        "854cef69-976d-4c2a-a18c-2aa45046c390",
+        "c101ab44-ed99-4a54-990d-47aa2bb4e7d9"
+    ]
+}
+
+//productsData.items = testProductsList.items
+//console.log(productsData.items);
+//console.log(productsData.getProduct("854cef69-976d-4c2a"))
+//console.log(orderData.addToBasket(testProductItem02))
+
+//console.log(orderData.countBasketAmount)
+//console.log(orderData.countPrices)
+//console.log(orderData.removeFromBasket("854cef69-976d-4c2a-a18c-2aa45046c390"))
+//console.log(orderData._total)
+
+//Promise.all([api.getProductList()])
+//    .then(([productList]) => {
+//        productsData.items = productList;
+//        //console.log(productsData.items);
+//        //console.log(productsData.getProduct("854cef69-976d-4c2a-a18c-2aa45046c390"));
+//        //console.log(orderResult);
+//        events.emit('initialData:loaded');
+//    })
+//    .catch((err) => {
+//		console.error(err);
+//	});
+
+    //, api.getProduct("1c521d84-c48d-48fa-8cfb-9d911fa515fd")
+    //, productItem
+    //, api.createOrder(testOrder01
+    //, orderResult
+//        console.log(productItem);
+
+//console.log(orderData.addToBasket("854cef69-976d-4c2a-a18c-2aa45046c390"))
+//console.log(productsData.items);
