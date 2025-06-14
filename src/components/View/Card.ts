@@ -4,93 +4,71 @@ import { IEvents } from '../base/events';
 import { categories } from '../../utils/constants';
 import { cloneTemplate } from '../../utils/utils';
 
-export class Card extends Component<IProductItem> {
-    protected element: HTMLElement;
-    protected events: IEvents;
-    protected _title: HTMLElement;
-	protected _image?: HTMLImageElement;
-	protected _price: HTMLElement;
-	protected _category?: HTMLElement;
-	protected _description?: HTMLElement;
-	protected _button?: HTMLButtonElement;
+interface IColors {
+	[key: string]: string;
+}
 
+export class Card extends Component<IProductItem> {
+    protected events: IEvents;
+    protected cardTitle: HTMLElement;
+	protected cardImage?: HTMLImageElement;
+	protected cardPrice: HTMLElement;
+	protected cardCategory?: HTMLElement;
+	protected cardButton?: HTMLButtonElement;
+	protected cardDescription?: HTMLElement;
+	protected cardId: string;
+
+	protected colors: IColors = {
+		'софт-скил': 'card__category card__category_soft',
+		другое: 'card__category card__category_other',
+		дополнительное: 'card__category card__category_additional',
+		кнопка: 'card__category card__category_button',
+		'хард-скил': 'card__category card__category_hard',
+	};
     constructor(protected container: HTMLElement, events: IEvents) {
         super(container);
         this.events = events;
 
-		this._title = this.container.querySelector('.card__title');
-		this._image = this.container.querySelector('.card__image');
-		this._price = this.container.querySelector('.card__price');
-		this._category = this.container.querySelector('.card__category');
-		this._button = this.container.querySelector('.card__button');
-		this._description = this.container.querySelector('.card__description');
+		this.cardTitle = this.container.querySelector('.card__title');
+		this.cardImage = this.container.querySelector('.card__image');
+		this.cardPrice = this.container.querySelector('.card__price');
+		this.cardCategory = this.container.querySelector('.card__category');
+		this.cardButton = this.container.querySelector('.card__button');
+		this.cardDescription = this.container.querySelector('.card__description');
 
         this.container.addEventListener('click', () =>
             this.events.emit('card:select', { card: this})
         );
     }
 
-    //render(data?: Partial<IProductItem>): HTMLElement;
-    //render(cardData: Partial<IProductItem>, userId: string): HTMLElement;
 
-    render(cardData: Partial<IProductItem> | undefined) {
-        if (!cardData) return this.container;
-
-        const { ...otherCardData } = cardData;
-        return super.render(otherCardData);
-    }
-
-	set id(value: string) {
-		this.container.dataset.id = value;
+	
+	set id(id) {
+		this.cardId = id;
 	}
 
-	get id(): string {
-		return this.container.dataset.id || '';
+	get id() {
+		return this.cardId;
 	}
 
-	set title(value: string) {
-		this.setText(this._title, value);
+	set title(title: string) {
+		this.cardTitle.textContent = title;
 	}
 
-	get title(): string {
-		return this._title.textContent || '';
+	set price(price: number | null) {
+		this.cardPrice.textContent = price ? String(price) + ' синапсов' : 'Бесценно';
 	}
 
-	set price(value: string) {
-		this.setText(this._price, value ? `${value} синапсов` : 'Бесценно');
-		if (this._button) {
-			this._button.disabled = !value;
-		}
+	set category(category: string) {
+		this.cardCategory.textContent = category;
+		this.cardCategory.className = this.colors[category];
 	}
 
-	get price(): string {
-		return this._price.textContent || '';
+	set description(description: string) {
+		this.cardDescription.textContent = description;
 	}
 
-	set category(value: string) {
-		this.setText(this._category, value);
-		if (this._category) {
-			this._category.classList.add(
-				`card__category_${
-					categories.get(value) ? categories.get(value) : 'other'
-				}`
-			);
-		}
-	}
-
-	get category(): string {
-		return this._category.textContent || '';
-	}
-
-	set image(src: string) {
-		this.setImage(this._image, src, this.title);
-	}
-
-	set description(value: string) {
-		this.setText(this._description, value);
-	}
-
-	set button(value: string) {
-		this.setText(this._button, value);
+	set image(image: string) {
+		this.cardImage.src = image;
 	}
 }

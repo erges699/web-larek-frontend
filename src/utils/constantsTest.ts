@@ -85,30 +85,30 @@ export const testProductsList=
 ]}
 
 export const testProductItem01 = {
-    "id": "854cef69-976d-4c2a-a18c-2aa45046c390",
-    "description": "Если планируете решать задачи в тренажёре, берите два.",
-    "image": "/5_Dots.svg",
-    "title": "+1 час в сутках",
-    "category": "софт-скил",
-    "price": 750
+    id: "854cef69-976d-4c2a-a18c-2aa45046c390",
+    description: "Если планируете решать задачи в тренажёре, берите два.",
+    image: "/5_Dots.svg",
+    title: "+1 час в сутках",
+    category: "софт-скил",
+    price: 750
 }
 
 export const testProductItem02 = {
-    "id": "90973ae5-285c-4b6f-a6d0-65d1d760b102",
-    "description": "Сжимайте мячик, чтобы снизить стресс от тем по бэкенду.",
-    "image": "/Mithosis.svg",
-    "title": "Бэкенд-антистресс",
-    "category": "другое",
-    "price": 1000
+    id: "90973ae5-285c-4b6f-a6d0-65d1d760b102",
+    description: "Сжимайте мячик, чтобы снизить стресс от тем по бэкенду.",
+    image: "/Mithosis.svg",
+    title: "Бэкенд-антистресс",
+    category: "другое",
+    price: 1000
 }
 
 export const testOrder01 = {
-    "payment": "online",
-    "email": "test@test.ru",
-    "phone": "+71234567890",
-    "address": "Spb Vosstania 1",
-    "total": 2200,
-    "items": [
+    payment: "online",
+    email: "test@test.ru",
+    phone: "+71234567890",
+    address: "Spb Vosstania 1",
+    total: 2200,
+    items: [
         "854cef69-976d-4c2a-a18c-2aa45046c390",
         "c101ab44-ed99-4a54-990d-47aa2bb4e7d9"
     ]
@@ -144,3 +144,35 @@ export const testOrder01 = {
 
 //console.log(orderData.addToBasket("854cef69-976d-4c2a-a18c-2aa45046c390"))
 //console.log(productsData.items);
+
+
+/** Card.ts render?    
+*  render(data?: Partial<IProductItem>): HTMLElement;
+*  render(cardData: Partial<IProductItem>, title: string, price: number | null ): HTMLElement;
+*
+*    render(cardData: Partial<IProductItem> | undefined) {
+*        if (!cardData) return this.container;
+*
+*        const { title, price, ...otherCardData } = cardData;
+*        return super.render(otherCardData);
+*    }
+*/ 
+
+/**
+ * const card1 = new Card(cloneTemplate(cardTemplate), events);
+ * const card2 = new Card(cloneTemplate(cardTemplate), events);
+ * const cardArray = [];
+ * cardArray.push(card1.render({
+ *    price: 1000,
+ *    category: "другое",
+ *    title: "Бэкенд-антистресс",
+ *    image: "https://larek-api.nomoreparties.co/content/weblarek/Mithosis.svg",
+ * }));
+ * cardArray.push(card2.render({
+ *    image: "https://larek-api.nomoreparties.co/content/weblarek/5_Dots.svg",
+ *    title: "+1 час в сутках",
+ *    category: "софт-скил",
+ *    price: 750
+ * }));
+ * cardsCatalog.render({catalog:cardArray})	
+ */

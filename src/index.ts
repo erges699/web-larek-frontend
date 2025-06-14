@@ -2,12 +2,25 @@ import './scss/styles.scss';
 import { ProductsData } from './components/ProductsData';
 import { OrderData } from './components/OrderData';
 import { EventEmitter, IEvents } from './components/base/events';
-import { IApi } from './types';
+import { IApi, IProductItem } from './types';
 import { Api } from './components/base/api';
 import { API_URL, CDN_URL, settings } from './utils/constants';
 import { testOrder01, testProductItem01, testProductsList } from './utils/constantsTest';
 import { AppAPI } from './components/AppApi';
+import { Card } from './components/View/Card';
+import { CardsCatalog } from './components/View/CardsCatalog';
+import { cloneTemplate } from './utils/utils';
 
+const successTemplate: HTMLTemplateElement = 
+	document.querySelector('#success');
+const contactsTemplate : HTMLTemplateElement = 
+	document.querySelector('#contacts');
+const orderTemplate: HTMLTemplateElement = 
+	document.querySelector('#order');
+const basketTemplate: HTMLTemplateElement = 
+	document.querySelector('#basket');
+const cardTemplate: HTMLTemplateElement = 
+    document.querySelector('#card-catalog');
 
 const events = new EventEmitter();
 
@@ -16,18 +29,41 @@ const api = new AppAPI(baseApi, CDN_URL);
 
 const productsData = new ProductsData(events);
 const orderData = new OrderData(events);
+const cardsCatalog = new CardsCatalog(document.body, events);
+
 
 events.onAll((event) => {
     console.log(event.eventName, event.data)
 })
 
-
 Promise.all([api.getProductList()])
     .then(([productList]) => {
         productsData.items = productList;
-
+		//console.log(productsData.items);
         events.emit('initialData:loaded');
     })
     .catch((err) => {
 		console.error(err);
 	});
+
+	
+//вывод карточек на главном экране
+events.on('initialData:loaded', (items: IProductItem[]) => {
+	cardsCatalog.basketCounter = orderData.items.length;
+	cardsCatalog.catalog = productsData.items.map((item) => {
+		const card = new Card(cloneTemplate(cardTemplate), events);
+		return card.render({
+			price: item.price,
+			category: item.category,
+			title: item.title,
+			image: item.image,
+		});
+	});
+});
+
+//const testSection = document.querySelector('.modal__content');
+//console.log(testSection);
+//const card = new Card(cardTemplate, events);
+//console.log(card);
+//testSection.append(card.render(testProductItem01))
+//console.log(testSection);
