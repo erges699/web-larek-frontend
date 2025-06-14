@@ -41,8 +41,6 @@ export class Card extends Component<IProductItem> {
         );
     }
 
-
-	
 	set id(id) {
 		this.cardId = id;
 	}
