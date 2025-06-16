@@ -57,17 +57,17 @@ Promise.all([api.getProductList()])
 
 	
 //вывод карточек на главном экране
-events.on('initialData:loaded', (items: IProductItem[]) => {
+events.on('initialData:loaded', () => {
 	cardsCatalog.basketCounter = orderData.items.length;
-	cardsCatalog.catalog = productsData.items.map((item) => {
-		const card = new Card(cloneTemplate(cardTemplate), events);
-		return card.render({
-			price: item.price,
-			category: item.category,
-			title: item.title,
-			image: item.image,
-		});
+	const cardsArray = productsData.items.map((card) => {
+		const cardInstant = new Card(cloneTemplate(cardTemplate), events);
+		
+		//const card = new Card(cloneTemplate(cardTemplate), {
+		//	onClick: () => events.emit('card:select', item)
+		//});
+		return cardInstant.render(card);
 	});
+	cardsCatalog.render({ catalog: cardsArray });
 });
 
 // вывод выбранной карточки в модальном окне
@@ -82,6 +82,7 @@ events.on('card:select', (item: IProductItem) => {
 			description: item.description,
 		}),
 	});
+	modal.open();
 });
 
 //Открытие корзины
