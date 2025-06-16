@@ -8,18 +8,16 @@ interface IColors {
 	[key: string]: string;
 }
 
-//interface ICardActions {
-//    onClick: (event: MouseEvent) => void;
-//}
-
 export class Card extends Component<IProductItem> {
     protected events: IEvents;
     protected cardTitle: HTMLElement;
 	protected cardImage?: HTMLImageElement;
 	protected cardPrice: HTMLElement;
 	protected cardCategory?: HTMLElement;
-	protected cardButton?: HTMLButtonElement;
+	protected cardAddToBusketButton?: HTMLButtonElement;
+	protected cardDelFromBusketButton?: HTMLButtonElement;
 	protected cardDescription?: HTMLElement;
+	protected cardBusketIndex: HTMLElement;
 	protected cardId: string;
 
 	protected colors: IColors = {
@@ -31,43 +29,29 @@ export class Card extends Component<IProductItem> {
 	};
     
 	constructor(protected container: HTMLElement, events: IEvents) {
-    //, actions?: ICardActions
 		super(container);
         this.events = events;
 
-		this.cardTitle = this.container.querySelector('.card__title');
 		this.cardImage = this.container.querySelector('.card__image');
-		this.cardPrice = this.container.querySelector('.card__price');
 		this.cardCategory = this.container.querySelector('.card__category');
-		this.cardButton = this.container.querySelector('.card__button');
-		this.cardDescription = this.container.querySelector('.card__text');
+		this.cardTitle = this.container.querySelector('.card__title');
+		this.cardDescription = this.container.querySelector('.card__text');	
+		this.cardPrice = this.container.querySelector('.card__price');
+		this.cardBusketIndex = this.container.querySelector('.basket__item-index');	
+		this.cardAddToBusketButton = this.container.querySelector('.button');
+		this.cardDelFromBusketButton = this.container.querySelector('.basket__item-delete');
 
-        //if (actions?.onClick) {
-        //    if (this.cardButton) {
-        //        this.cardButton.addEventListener('click', actions.onClick);
-        //    } else {
-        //        container.addEventListener('click', actions.onClick);
-        //    }
-        //}
-		if (this.cardButton) {
-			this.cardButton.addEventListener('click', () =>
-				this.events.emit('button:select', { button: this})
-			);
+		if (this.cardAddToBusketButton) {
+			this.cardAddToBusketButton.addEventListener('click', () =>
+				this.events.emit('busket:add', { card: this }));
+		} else if (this.cardDelFromBusketButton) {
+			this.cardDelFromBusketButton.addEventListener('click', () =>
+				this.events.emit('busket:delete', { card: this }));
 		} else {
 			this.container.addEventListener('click', () =>
-				this.events.emit('card:select', { card: this})
-			);
+				this.events.emit('card:preview', { card: this }));
 		}
-    }
 
-	render(data?: Partial<IProductItem>): HTMLElement;
-	render(cardData: Partial<IProductItem>, title: string, price: number | null ): HTMLElement;
-
-    render(cardData: Partial<IProductItem> | undefined) {
-        if (!cardData) return this.container;
-
-        const { title, price, ...otherCardData } = cardData;
-        return super.render(otherCardData);
     }
 
 	set id(id) {
@@ -98,4 +82,11 @@ export class Card extends Component<IProductItem> {
 	set image(image: string) {
 		this.cardImage.src = image;
 	}
+
+    set busketIndex(value: number) {
+        if (this.cardBusketIndex) { 
+            console.log(value);
+            this.cardBusketIndex.textContent = String(value);
+        }
+    }
 }

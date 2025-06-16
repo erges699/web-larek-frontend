@@ -5,6 +5,7 @@ export interface IProductItem {
   title: string;
   category: string;
   price: number | null;
+  busketIndex: number;
 }
 
 export type PaymentMethod = 'cash' | 'card';

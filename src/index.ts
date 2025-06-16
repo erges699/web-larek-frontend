@@ -14,20 +14,14 @@ import { cloneTemplate, createElement } from './utils/utils';
 import { Basket } from './components/View/Basket';
 
 
-const successTemplate: HTMLTemplateElement = 
-	document.querySelector('#success');
-const contactsTemplate : HTMLTemplateElement = 
-	document.querySelector('#contacts');
-const orderTemplate: HTMLTemplateElement = 
-	document.querySelector('#order');
-const basketTemplate: HTMLTemplateElement = 
-	document.querySelector('#basket');
-const cardTemplate: HTMLTemplateElement = 
-    document.querySelector('#card-catalog');
-const productTemplate: HTMLTemplateElement = 
-    document.querySelector('#card-preview');
-const modalTemplate: HTMLTemplateElement = 
-    document.querySelector('#modal-container');
+const successTemplate: HTMLTemplateElement = document.querySelector('#success');
+const cardTemplate: HTMLTemplateElement = document.querySelector('#card-catalog');
+const productTemplate: HTMLTemplateElement = document.querySelector('#card-preview');
+const basketTemplate: HTMLTemplateElement = document.querySelector('#basket');
+const contactsTemplate : HTMLTemplateElement = document.querySelector('#contacts');
+const orderTemplate: HTMLTemplateElement = document.querySelector('#order');
+
+const modalTemplate: HTMLTemplateElement = document.querySelector('#modal-container');
 
 const events = new EventEmitter();
 
@@ -61,34 +55,62 @@ events.on('initialData:loaded', () => {
 	cardsCatalog.basketCounter = orderData.items.length;
 	const cardsArray = productsData.items.map((card) => {
 		const cardInstant = new Card(cloneTemplate(cardTemplate), events);
-		
-		//const card = new Card(cloneTemplate(cardTemplate), {
-		//	onClick: () => events.emit('card:select', item)
-		//});
-		return cardInstant.render(card);
+		return cardInstant.render({
+			id: card.id,
+			category: card.category,
+			title: card.title,
+			image: card.image,
+			price: card.price,
+		});
 	});
 	cardsCatalog.render({ catalog: cardsArray });
 });
 
 // вывод выбранной карточки в модальном окне
-events.on('card:select', (item: IProductItem) => {
+events.on('card:preview', (data: { card: IProductItem }) => {
+	const { card } = data;
+	const {id, image, category, title, description, price} = productsData.getProduct(card.id);
+	const cardArray = {id, image, category, title, description, price}
 	const cardPreview = new Card(cloneTemplate(productTemplate), events);
 	modal.render({
-		content: cardPreview.render({
-			price: item.price,
-			category: item.category,
-			title: item.title,
-			image: item.image,
-			description: item.description,
-		}),
+		content: cardPreview.render(cardArray),
 	});
 	modal.open();
 });
 
 //Открытие корзины
 events.on('basket:open', () => {
-	modal.render({
-		content: createElement<HTMLElement>('div', {}, [basket.render()]),
+	console.log(orderData.items);
+	const cardsArray = orderData.items.map((item, index) => {
+		console.log(item.id, item.title, item.price)
+		const cardInstant = new Card(cloneTemplate(basketTemplate), events);
+		return cardInstant.render({
+			title: item.title, 
+			price: item.price,
+			busketIndex: index + 1,
+		});
 	});
+	console.log(cardsArray);
+	modal.render({
+		content: basket.render({items: cardsArray, total: orderData.count}),
+	});	
+	//modal.content = basketView.render({
+	//		items: items,
+	//		total: basket.getTotal()
+	//	});
+	//modal.render({
+	//	content: createElement<HTMLElement>('div', {}, [basket.render()]),
+	//});
 	modal.open();
 });
+
+//Добавить в корзину (предпросмотр карточки)
+events.on('busket:add', (data: { card: IProductItem }) => {
+	const { card } = data;
+	const item = productsData.getProduct(card.id);
+	orderData.addToBasket(item);
+	orderData.countBasketAmount();
+	cardsCatalog.basketCounter = orderData.count;
+	modal.close();
+});
+

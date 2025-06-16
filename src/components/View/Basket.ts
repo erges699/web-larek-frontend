@@ -3,7 +3,7 @@ import { Component } from "../base/Component";
 import { IEvents } from '../base/events';
 
 interface IBasket{
-	items: HTMLElement;
+	items: HTMLElement[];
 	total: number;
 }
 
