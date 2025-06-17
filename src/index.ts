@@ -17,7 +17,8 @@ import { Basket } from './components/View/Basket';
 const successTemplate: HTMLTemplateElement = document.querySelector('#success');
 const cardTemplate: HTMLTemplateElement = document.querySelector('#card-catalog');
 const productTemplate: HTMLTemplateElement = document.querySelector('#card-preview');
-const basketTemplate: HTMLTemplateElement = document.querySelector('#basket');
+const cardBasketTemplate: HTMLTemplateElement = document.querySelector('#card-basket');
+const BasketTemplate: HTMLTemplateElement = document.querySelector('#basket');
 const contactsTemplate : HTMLTemplateElement = document.querySelector('#contacts');
 const orderTemplate: HTMLTemplateElement = document.querySelector('#order');
 
@@ -31,7 +32,7 @@ const api = new AppAPI(baseApi, CDN_URL);
 const productsData = new ProductsData(events);
 const orderData = new OrderData(events);
 const modal = new Modal(modalTemplate, events);
-const basket = new Basket(cloneTemplate(basketTemplate), events);
+const basket = new Basket(cloneTemplate(BasketTemplate), events);
 const cardsCatalog = new CardsCatalog(document.body, events);
 
 
@@ -78,21 +79,35 @@ events.on('card:preview', (data: { card: IProductItem }) => {
 	modal.open();
 });
 
-//Открытие корзины
-events.on('basket:open', () => {
-	console.log(orderData.items);
+//Изменение корзины
+events.on('basket:changed', () => {
 	const cardsArray = orderData.items.map((item, index) => {
-		console.log(item.id, item.title, item.price)
-		const cardInstant = new Card(cloneTemplate(basketTemplate), events);
+		const cardInstant = new Card(cloneTemplate(cardBasketTemplate), events);
 		return cardInstant.render({
+			id: item.id,
 			title: item.title, 
 			price: item.price,
 			busketIndex: index + 1,
 		});
-	});
-	console.log(cardsArray);
+	});	
+	const cardsTotal = orderData.total;
+})
+
+//Открытие корзины
+events.on('basket:open', () => {
+
+	const cardsArray = orderData.items.map((item, index) => {
+		const cardInstant = new Card(cloneTemplate(cardBasketTemplate), events);
+		return cardInstant.render({
+			id: item.id,
+			title: item.title, 
+			price: item.price,
+			busketIndex: index + 1,
+		});
+	});	
+	const cardsTotal = orderData.total;
 	modal.render({
-		content: basket.render({items: cardsArray, total: orderData.count}),
+		content: basket.render({items: cardsArray, total: cardsTotal}),
 	});	
 	//modal.content = basketView.render({
 	//		items: items,
@@ -101,6 +116,8 @@ events.on('basket:open', () => {
 	//modal.render({
 	//	content: createElement<HTMLElement>('div', {}, [basket.render()]),
 	//});
+	//{items: cardsArray, total: orderData.count}
+	//		console.log(item.id, item.title, item.price)
 	modal.open();
 });
 
@@ -110,7 +127,15 @@ events.on('busket:add', (data: { card: IProductItem }) => {
 	const item = productsData.getProduct(card.id);
 	orderData.addToBasket(item);
 	orderData.countBasketAmount();
-	cardsCatalog.basketCounter = orderData.count;
-	modal.close();
+	cardsCatalog.basketCounter = orderData.count;	
+	//modal.close();
 });
 
+//Удалить из корзины (в корзине)
+events.on('busket:delete', (data: { card: IProductItem }) => {
+	const { card } = data;
+	orderData.removeFromBasket(card.id);
+	orderData.countBasketAmount();
+	cardsCatalog.basketCounter = orderData.count;	
+	//modal.close();
+});

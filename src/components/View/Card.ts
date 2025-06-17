@@ -50,9 +50,8 @@ export class Card extends Component<IProductItem> {
 		} else {
 			this.container.addEventListener('click', () =>
 				this.events.emit('card:preview', { card: this }));
-		}
-
-    }
+		}	
+	}
 
 	set id(id) {
 		this.cardId = id;
@@ -62,25 +61,31 @@ export class Card extends Component<IProductItem> {
 		return this.cardId;
 	}
 
-	set title(title: string) {
-		this.cardTitle.textContent = title;
+	set title(value: string) {
+		this.cardTitle.textContent = value;
 	}
 
-	set price(price: number | null) {
-		this.cardPrice.textContent = price ? String(price) + ' синапсов' : 'Бесценно';
+	set price(value: number | null) {
+		this.cardPrice.textContent = value ? String(value) + ' синапсов' : 'Бесценно';
 	}
 
-	set category(category: string) {
-		this.cardCategory.textContent = category;
-		this.cardCategory.className = this.colors[category];
+	set category(value: string) {
+		if (this.cardCategory) {
+			this.cardCategory.textContent = value;
+			this.cardCategory.className = this.colors[value];
+		}
 	}
 
-	set description(description: string) {
-		this.cardDescription.textContent = description;
+	set description(value: string) {
+		if (this.cardDescription) {
+			this.cardDescription.textContent = value;
+		}
 	}
 
-	set image(image: string) {
-		this.cardImage.src = image;
+	set image(value: string) {
+		if (this.cardImage) {
+			this.cardImage.src = value;
+		}
 	}
 
     set busketIndex(value: number) {

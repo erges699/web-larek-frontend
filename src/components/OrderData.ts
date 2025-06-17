@@ -37,12 +37,12 @@ export class OrderData implements IOrderData {
 
   addToBasket(item: IProductItem) {
     this._items.push(item);
-    this.events.emit('basket:added');
+    this.events.emit('basket:changed');
     }
 
   removeFromBasket(productId: string) {
     this._items = this._items.filter((item) => item.id !== productId);
-    this.events.emit('basket:removed',);
+    this.events.emit('basket:changed',);
     }
 
   clearBasket() {

@@ -17,18 +17,21 @@ export class Basket extends Component<IBasket> {
     constructor(protected container: HTMLElement, events: IEvents) {
         super(container);
         this.events = events;
+
 		this.basketList = this.container.querySelector('.basket__list');
 		this.busketButton = container.querySelector('.button');
 		this.busketPrice = container.querySelector('.basket__price'); 
+
 		if (this.busketButton) {
 			this.busketButton.addEventListener('click', () => {
 				events.emit('order:open');
 			});
 		}
-        this.busketSet = []               
+		
+        this.items = []               
     } 
 
-    set busketSet(items: HTMLElement[]) {
+    set items(items: HTMLElement[]) {
 		if (items.length) {
 			this.setDisabled(this.busketButton, false);
 			this.basketList.replaceChildren(...items);
@@ -42,7 +45,7 @@ export class Basket extends Component<IBasket> {
 		}        
     }
 
-	set busketAmount(total: number) {
+	set total(total: number) {
 		this.busketPrice.textContent  = String(total) + ' синапсов';
 	}
 }
