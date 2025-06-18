@@ -17,7 +17,7 @@ export class Card extends Component<IProductItem> {
 	protected cardAddToBusketButton?: HTMLButtonElement;
 	protected cardDelFromBusketButton?: HTMLButtonElement;
 	protected cardDescription?: HTMLElement;
-	protected cardBusketIndex: HTMLElement;
+	protected cardBusketIndex?: HTMLElement;
 	protected cardId: string;
 
 	protected colors: IColors = {
@@ -84,15 +84,15 @@ export class Card extends Component<IProductItem> {
 	}
 
     set busketIndex(value: number) {
-		console.log(value);
+		//console.log(value);
 		this.cardBusketIndex.textContent = String(value);
     }
-    
+
 	set inBasket(value: boolean) {
-		if (value) {
-			this.setDisabled(this.cardAddToBusketButton, value);
-			this.cardAddToBusketButton.textContent = ( value ? 'Уже в корзине' : 'В корзину');
-		}
+		//console.log(value);
+		this.cardAddToBusketButton.disabled = !value;
+		this.cardAddToBusketButton.textContent = value ? 'Уже в корзине' : 'В корзину';
+		//}
     }
 
 }

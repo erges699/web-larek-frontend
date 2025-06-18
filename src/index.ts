@@ -65,7 +65,7 @@ function basketPreview() {
 function cardPreview(data: { card: IProductItem }) {
 	const cardPreview = new Card(cloneTemplate(productTemplate), events);
 	const item = getItemCard(data);
-	console.log(item.inBusket);
+	//console.log(item.inBusket);
 	modal.render({
 		content: cardPreview.render(item),
 	});	
@@ -128,6 +128,7 @@ events.on('busket:add', (data: { card: IProductItem }) => {
 	orderData.addToBasket(getItemCard(data));
 	cardsCatalog.basketCounter = orderData.countBasketAmount();
 	cardPreview(data);
+	modal.close();
 });
 
 //Удалить из корзины (в корзине)
