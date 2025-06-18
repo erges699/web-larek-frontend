@@ -6,6 +6,7 @@ export interface IProductItem {
   category: string;
   price: number | null;
   busketIndex: number;
+  inBusket: boolean;
 }
 
 export type PaymentMethod = 'cash' | 'card';
@@ -35,12 +36,12 @@ export interface IOrderData {
 	items: 	IProductItem[];
 	total: number | null;
 	order: TOrder;
-	isInBasket(item: IProductItem): boolean;
+	isInBasket(itemId: string): boolean;
 	addToBasket(item: IProductItem): void;
 	removeFromBasket(productId: string): void;
 	clearBasket(): void;
-	countPrices(): void; 
-	countBasketAmount(): void;
+	countPrices(): number; 
+	countBasketAmount(): number;
 	createOrderToPost(): void;
 	setOrderField(field: keyof TOrder, value: string): void;
 	clearOrder(): void;

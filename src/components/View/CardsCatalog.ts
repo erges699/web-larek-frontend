@@ -39,7 +39,7 @@ export class CardsCatalog extends Component<ICardsCatalog> {
 		this.headerBasketCounter.textContent = String(count);
 	}
 
-	set locked(value: boolean) {
+	set scrollLock(value: boolean) {
 		if (value) {
 			this.wrapper.classList.add('page__wrapper_locked');
 		} else {

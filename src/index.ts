@@ -40,6 +40,37 @@ events.onAll((event) => {
     console.log(event.eventName, event.data)
 })
 
+function getItemCard(data: { card: IProductItem }) {
+	const { card } = data;
+	const itemCard = productsData.getProduct(card.id);
+	itemCard.inBusket = orderData.isInBasket(itemCard.id);
+	return itemCard;
+}
+
+function basketPreview() {
+	const cardsArray = orderData.items.map((item, index) => {
+		const cardInstant = new Card(cloneTemplate(cardBasketTemplate), events);
+		return cardInstant.render({
+			id: item.id,
+			title: item.title, 
+			price: item.price,
+			busketIndex: index + 1,
+		});
+	});	
+	modal.render({
+		content: basket.render({items: cardsArray, total: orderData.countPrices()}),
+	});		
+}
+
+function cardPreview(data: { card: IProductItem }) {
+	const cardPreview = new Card(cloneTemplate(productTemplate), events);
+	const item = getItemCard(data);
+	console.log(item.inBusket);
+	modal.render({
+		content: cardPreview.render(item),
+	});	
+}
+
 Promise.all([api.getProductList()])
     .then(([productList]) => {
         productsData.items = productList;
@@ -69,73 +100,46 @@ events.on('initialData:loaded', () => {
 
 // вывод выбранной карточки в модальном окне
 events.on('card:preview', (data: { card: IProductItem }) => {
-	const { card } = data;
-	const {id, image, category, title, description, price} = productsData.getProduct(card.id);
-	const cardArray = {id, image, category, title, description, price}
-	const cardPreview = new Card(cloneTemplate(productTemplate), events);
-	modal.render({
-		content: cardPreview.render(cardArray),
-	});
+	cardPreview(data);
+	//const { card } = data;
+	//const item = productsData.getProduct(card.id);
+	//cardPreview(item);
+	//item.isInBusket = orderData.isInBasket(item.id);
+	//const cardPreview = new Card(cloneTemplate(productTemplate), events);
+	//modal.render({
+	//	content: cardPreview.render(item),
+	//});
 	modal.open();
 });
 
 //Изменение корзины
-events.on('basket:changed', () => {
-	const cardsArray = orderData.items.map((item, index) => {
-		const cardInstant = new Card(cloneTemplate(cardBasketTemplate), events);
-		return cardInstant.render({
-			id: item.id,
-			title: item.title, 
-			price: item.price,
-			busketIndex: index + 1,
-		});
-	});	
-	const cardsTotal = orderData.total;
+events.on('basket:added', () => {
+	//basketPreview();
 })
 
 //Открытие корзины
 events.on('basket:open', () => {
-
-	const cardsArray = orderData.items.map((item, index) => {
-		const cardInstant = new Card(cloneTemplate(cardBasketTemplate), events);
-		return cardInstant.render({
-			id: item.id,
-			title: item.title, 
-			price: item.price,
-			busketIndex: index + 1,
-		});
-	});	
-	const cardsTotal = orderData.total;
-	modal.render({
-		content: basket.render({items: cardsArray, total: cardsTotal}),
-	});	
-	//modal.content = basketView.render({
-	//		items: items,
-	//		total: basket.getTotal()
-	//	});
-	//modal.render({
-	//	content: createElement<HTMLElement>('div', {}, [basket.render()]),
-	//});
-	//{items: cardsArray, total: orderData.count}
-	//		console.log(item.id, item.title, item.price)
+	basketPreview();
 	modal.open();
 });
 
 //Добавить в корзину (предпросмотр карточки)
 events.on('busket:add', (data: { card: IProductItem }) => {
-	const { card } = data;
-	const item = productsData.getProduct(card.id);
-	orderData.addToBasket(item);
-	orderData.countBasketAmount();
-	cardsCatalog.basketCounter = orderData.count;	
-	//modal.close();
+	orderData.addToBasket(getItemCard(data));
+	cardsCatalog.basketCounter = orderData.countBasketAmount();
+	cardPreview(data);
 });
 
 //Удалить из корзины (в корзине)
 events.on('busket:delete', (data: { card: IProductItem }) => {
 	const { card } = data;
 	orderData.removeFromBasket(card.id);
-	orderData.countBasketAmount();
-	cardsCatalog.basketCounter = orderData.count;	
+	cardsCatalog.basketCounter = orderData.countBasketAmount();
+	basketPreview();
 	//modal.close();
+});
+
+//  Блокировать/разблокировать скролл экрана
+events.on('modal: cardsCatalog.scrollLock', ({ lock }: { lock: boolean }) => {
+	cardsCatalog.scrollLock = lock;
 });

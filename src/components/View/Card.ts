@@ -70,28 +70,29 @@ export class Card extends Component<IProductItem> {
 	}
 
 	set category(value: string) {
-		if (this.cardCategory) {
-			this.cardCategory.textContent = value;
-			this.cardCategory.className = this.colors[value];
-		}
+		this.cardCategory.textContent = value;
+		this.cardCategory.className = this.colors[value];
+
 	}
 
 	set description(value: string) {
-		if (this.cardDescription) {
-			this.cardDescription.textContent = value;
-		}
+		this.cardDescription.textContent = value;
 	}
 
 	set image(value: string) {
-		if (this.cardImage) {
-			this.cardImage.src = value;
-		}
+		this.cardImage.src = value;
 	}
 
     set busketIndex(value: number) {
-        if (this.cardBusketIndex) { 
-            console.log(value);
-            this.cardBusketIndex.textContent = String(value);
-        }
+		console.log(value);
+		this.cardBusketIndex.textContent = String(value);
     }
+    
+	set inBasket(value: boolean) {
+		if (value) {
+			this.setDisabled(this.cardAddToBusketButton, value);
+			this.cardAddToBusketButton.textContent = ( value ? 'Уже в корзине' : 'В корзину');
+		}
+    }
+
 }

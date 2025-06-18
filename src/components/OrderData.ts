@@ -31,18 +31,18 @@ export class OrderData implements IOrderData {
     return this._order;
   }
 
-  isInBasket(item: IProductItem) {
-    return this._items.includes(item);
+  isInBasket(itemId: string) {
+    return this._items.some(item => item.id === itemId);
   }
 
   addToBasket(item: IProductItem) {
     this._items.push(item);
-    this.events.emit('basket:changed');
+    this.events.emit('basket:added');
     }
 
   removeFromBasket(productId: string) {
     this._items = this._items.filter((item) => item.id !== productId);
-    this.events.emit('basket:changed',);
+    this.events.emit('basket:removed');
     }
 
   clearBasket() {
@@ -51,12 +51,12 @@ export class OrderData implements IOrderData {
     }
 
   countPrices() {
-    this._total = this._items.reduce((sum, item) => sum + (item.price || 0), 0);
-    this.events.emit('basket:changed');
+    return this._total = this._items.reduce((sum, item) => sum + (item.price || 0), 0);
+
   }
 
-  countBasketAmount() {
-    this._count = this._items.length;
+  countBasketAmount(){
+    return this._count = this._items.length;
   }
 
   setPayment(method: PaymentMethod) {
