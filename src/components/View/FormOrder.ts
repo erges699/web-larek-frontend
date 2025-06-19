@@ -10,4 +10,9 @@ export interface IFormState {
 export class FormOrder extends Component<IOrder> {
     protected events: IEvents;
 
+	constructor(protected container: HTMLElement, events: IEvents) {
+		super(container);
+        this.events = events;
+    }
+
 }

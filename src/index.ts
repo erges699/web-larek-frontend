@@ -12,8 +12,19 @@ import { Modal } from './components/View/Modal';
 import { CardsCatalog } from './components/View/CardsCatalog';
 import { cloneTemplate, createElement } from './utils/utils';
 import { Basket } from './components/View/Basket';
+import { FormOrder } from './components/View/FormOrder';
+import { FormContacts } from './components/View/FormContacts';
 
 
+const events = new EventEmitter();
+const baseApi: IApi = new Api(API_URL, settings);
+const api = new AppAPI(baseApi, CDN_URL);
+
+events.onAll((event) => {
+    console.log(event.eventName, event.data)
+})
+
+//Шаблоны
 const successTemplate: HTMLTemplateElement = document.querySelector('#success');
 const cardTemplate: HTMLTemplateElement = document.querySelector('#card-catalog');
 const productTemplate: HTMLTemplateElement = document.querySelector('#card-preview');
@@ -21,25 +32,22 @@ const cardBasketTemplate: HTMLTemplateElement = document.querySelector('#card-ba
 const BasketTemplate: HTMLTemplateElement = document.querySelector('#basket');
 const contactsTemplate : HTMLTemplateElement = document.querySelector('#contacts');
 const orderTemplate: HTMLTemplateElement = document.querySelector('#order');
-
 const modalTemplate: HTMLTemplateElement = document.querySelector('#modal-container');
 
-const events = new EventEmitter();
+//Глобальные контейнеры
+const cardsCatalog = new CardsCatalog(document.body, events);
+const modal = new Modal(modalTemplate, events);
 
-const baseApi: IApi = new Api(API_URL, settings);
-const api = new AppAPI(baseApi, CDN_URL);
-
+//Модели данных приложения
 const productsData = new ProductsData(events);
 const orderData = new OrderData(events);
-const modal = new Modal(modalTemplate, events);
+
+//Переиспользуемые части интерфейса
 const basket = new Basket(cloneTemplate(BasketTemplate), events);
-const cardsCatalog = new CardsCatalog(document.body, events);
+const order = new FormOrder(cloneTemplate(orderTemplate), events);
+const contacts = new FormContacts(cloneTemplate(contactsTemplate), events);
 
-
-events.onAll((event) => {
-    console.log(event.eventName, event.data)
-})
-
+//Функции
 function getItemCard(data: { card: IProductItem }) {
 	const { card } = data;
 	const itemCard = productsData.getProduct(card.id);
