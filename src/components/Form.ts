@@ -29,12 +29,12 @@ export class Form<T> extends Component<IFormState> {
 
         this.container.addEventListener('submit', (e: Event) => {
             e.preventDefault();
-            this.events.emit(`${this.container.name}:submit`);
+            this.events.emit(`${this._formName}:submit`);
         });
     }
 
     protected onInputChange(field: keyof T, value: string) {
-        this.events.emit(`${this.container.name}.${String(field)}:change`, {
+        this.events.emit(`${this._formName}.${String(field)}:change`, {
             field,
             value
         });

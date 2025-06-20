@@ -152,3 +152,10 @@ events.on('busket:delete', (data: { card: IProductItem }) => {
 events.on('modal: cardsCatalog.scrollLock', ({ lock }: { lock: boolean }) => {
 	cardsCatalog.scrollLock = lock;
 });
+
+//Изменение корзины
+events.on('order:open', () => {
+	modal.render({
+		content: order.render()
+	});
+});
