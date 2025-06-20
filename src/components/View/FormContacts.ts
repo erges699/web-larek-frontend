@@ -1,28 +1,28 @@
-import { IOrder } from "../../types";
+import { TContactForm } from "../../types";
 import { Component } from "../base/Component"; 
 import { IEvents } from '../base/events';
 import { Form } from "../Form";
  
-
-export class FormContacts<IOrder>  extends Form<IOrder> {
-    protected _emailInput: HTMLInputElement;
-	protected _phoneInput: HTMLInputElement;
+//export class FormContacts<TContactForm>  extends Form<TContactForm> {
+export class FormContacts extends Form<TContactForm> {
+    protected emailInput: HTMLInputElement;
+	protected phoneInput: HTMLInputElement;
     protected events: IEvents;
 
 	constructor(protected container: HTMLElement, events: IEvents) {
 		super(container, events);
 
-		this._emailInput = container.querySelector('input[name="email"]');
-		this._phoneInput = container.querySelector('input[name="phone"]');
+		this.emailInput = container.querySelector('input[name="email"]');
+		this.phoneInput = container.querySelector('input[name="phone"]');
     }
 
 	set email(value: string) {
         console.log('formContacts: email =', value);
-        this._emailInput.value = value;
+        this.emailInput.value = value;
 	}
 
 	set phone(value: string) {
         console.log('formContacts: phone =', value);
-        this._phoneInput.value = value;
+        this.phoneInput.value = value;
 	}
 }

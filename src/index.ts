@@ -2,7 +2,7 @@ import './scss/styles.scss';
 import { ProductsData } from './components/ProductsData';
 import { OrderData } from './components/OrderData';
 import { EventEmitter, IEvents } from './components/base/events';
-import { IApi, IProductItem } from './types';
+import { IApi, IProductItem, TContactForm, TPaymentForm } from './types';
 import { Api } from './components/base/api';
 import { API_URL, CDN_URL, settings } from './utils/constants';
 import { testOrder01, testProductItem01, testProductsList } from './utils/constantsTest';
@@ -153,9 +153,34 @@ events.on('modal: cardsCatalog.scrollLock', ({ lock }: { lock: boolean }) => {
 	cardsCatalog.scrollLock = lock;
 });
 
+// Изменилось состояние валидации формы
+events.on('formErrors:change', (errors: Partial<TContactForm>) => {
+    const { email, phone } = errors;
+    order.valid = !email && !phone;
+    order.errors = Object.values({phone, email}).filter(i => !!i).join('; ');
+});
+
+// Изменилось состояние валидации формы
+events.on('formErrors:change', (errors: Partial<TPaymentForm>) => {
+    const { payment, address } = errors;
+	console.log(payment, address);
+    order.valid = !payment && !address;
+	console.log(order.valid);
+    order.errors = Object.values({payment, address}).filter(i => !!i).join('; ');
+});
+
+// Изменилось одно из полей
+events.on(/^order\..*:change/, (data: { field: keyof TPaymentForm, value: string }) => {
+    orderData.setOrderField(data.field, data.value);
+});
+
 //Изменение корзины
 events.on('order:open', () => {
 	modal.render({
-		content: order.render()
+		content: order.render({
+            valid: false,
+            errors: []
+        })
 	});
+	orderData.checkFormFieldValidation();
 });

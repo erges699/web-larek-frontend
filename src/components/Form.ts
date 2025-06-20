@@ -3,22 +3,22 @@ import { IEvents } from './base/events';
 
 export interface IFormState {
     valid?: boolean;
-    errors?: string;
+    errors?: string[];
 }
 
 export class Form<T> extends Component<IFormState> {
-    protected _submit: HTMLButtonElement;
-    protected _errors: HTMLElement;
-    protected _formName: string;
+    protected formSubmit: HTMLButtonElement;
+    protected formErrors: HTMLElement;
+    protected formName: string;
     protected events: IEvents;
 
     constructor(protected container: HTMLElement, events: IEvents) {
         super(container);
         this.events = events;
-        this._formName = this.container.getAttribute('name')+'Form';
+        this.formName = this.container.getAttribute('name')+'Form';
 
-        this._submit = this.container.querySelector('button[type=submit]');
-        this._errors = this.container.querySelector('.form__errors');
+        this.formSubmit = this.container.querySelector('button[type=submit]');
+        this.formErrors = this.container.querySelector('.form__errors');
 
         this.container.addEventListener('input', (e: Event) => {
             const target = e.target as HTMLInputElement;
@@ -29,23 +29,33 @@ export class Form<T> extends Component<IFormState> {
 
         this.container.addEventListener('submit', (e: Event) => {
             e.preventDefault();
-            this.events.emit(`${this._formName}:submit`);
+            this.events.emit(`${this.formName}:submit`);
         });
     }
 
     protected onInputChange(field: keyof T, value: string) {
-        this.events.emit(`${this._formName}.${String(field)}:change`, {
+        this.events.emit(`${this.formName}.${String(field)}:change`, {
             field,
             value
         });
     }
     
     set valid(value: boolean) {
-        this._submit.disabled = !value;
+        console.log(`${this.formName}: order: валидация — Valid:`, value);
+        this.formSubmit.disabled = !value;
     }
 
     set errors(value: string) {
-        this.setText(this._errors, value);
+        console.log(`${this.formName}: ошибочки:`, value);
+        this.setText(this.formErrors, value);
+    }
+
+    render(state: Partial<T> & IFormState) {
+        const {valid, errors, ...inputs} = state;
+        super.render({valid, errors});
+        Object.assign(this, inputs);
+        return this.container;
+
     }
 
 }
