@@ -7,7 +7,7 @@ import { Api } from './components/base/api';
 import { API_URL, CDN_URL, settings } from './utils/constants';
 import { testOrder01, testProductItem01, testProductsList } from './utils/constantsTest';
 import { AppAPI } from './components/AppApi';
-import { Card } from './components/View/Card';
+import { CardBasket, CardCatalog, CardPreview } from './components/View/Card';
 import { Modal } from './components/View/Modal';
 import { CardsCatalog } from './components/View/CardsCatalog';
 import { cloneTemplate, createElement } from './utils/utils';
@@ -27,7 +27,7 @@ events.onAll((event) => {
 
 //Шаблоны
 const successTemplate: HTMLTemplateElement = document.querySelector('#success');
-const cardTemplate: HTMLTemplateElement = document.querySelector('#card-catalog');
+const catalogTemplate: HTMLTemplateElement = document.querySelector('#card-catalog');
 const productTemplate: HTMLTemplateElement = document.querySelector('#card-preview');
 const cardBasketTemplate: HTMLTemplateElement = document.querySelector('#card-basket');
 const BasketTemplate: HTMLTemplateElement = document.querySelector('#basket');
@@ -54,12 +54,13 @@ function getItemCard(data: { card: IProductItem }) {
 	const { card } = data;
 	const itemCard = productsData.getProduct(card.id);
 	itemCard.inBusket = orderData.isInBasket(itemCard.id);
+	console.log(itemCard);
 	return itemCard;
 }
 
 function basketPreview() {
 	const cardsArray = orderData.items.map((item, index) => {
-		const cardInstant = new Card(cloneTemplate(cardBasketTemplate), events);
+		const cardInstant = new CardBasket(cloneTemplate(cardBasketTemplate), events);
 		return cardInstant.render({
 			id: item.id,
 			title: item.title, 
@@ -73,11 +74,9 @@ function basketPreview() {
 }
 
 function cardPreview(data: { card: IProductItem }) {
-	const cardPreview = new Card(cloneTemplate(productTemplate), events);
-	const item = getItemCard(data);
-	//console.log(item.inBusket);
+	const cardPreview = new CardPreview(cloneTemplate(productTemplate), events);
 	modal.render({
-		content: cardPreview.render(item),
+		content: cardPreview.render(getItemCard(data)),
 	});	
 }
 
@@ -96,14 +95,8 @@ Promise.all([api.getProductList()])
 events.on('initialData:loaded', () => {
 	cardsCatalog.basketCounter = orderData.items.length;
 	const cardsArray = productsData.items.map((card) => {
-		const cardInstant = new Card(cloneTemplate(cardTemplate), events);
-		return cardInstant.render({
-			id: card.id,
-			category: card.category,
-			title: card.title,
-			image: card.image,
-			price: card.price,
-		});
+		const cardInstant = new CardCatalog(cloneTemplate(catalogTemplate), events);
+		return cardInstant.render(card);
 	});
 	cardsCatalog.render({ catalog: cardsArray });
 });
@@ -111,21 +104,8 @@ events.on('initialData:loaded', () => {
 // вывод выбранной карточки в модальном окне
 events.on('card:preview', (data: { card: IProductItem }) => {
 	cardPreview(data);
-	//const { card } = data;
-	//const item = productsData.getProduct(card.id);
-	//cardPreview(item);
-	//item.isInBusket = orderData.isInBasket(item.id);
-	//const cardPreview = new Card(cloneTemplate(productTemplate), events);
-	//modal.render({
-	//	content: cardPreview.render(item),
-	//});
 	modal.open();
 });
-
-//Изменение корзины
-events.on('basket:added', () => {
-	//basketPreview();
-})
 
 //Открытие корзины
 events.on('basket:open', () => {
@@ -137,7 +117,6 @@ events.on('basket:open', () => {
 events.on('busket:add', (data: { card: IProductItem }) => {
 	orderData.addToBasket(getItemCard(data));
 	cardsCatalog.basketCounter = orderData.countBasketAmount();
-	cardPreview(data);
 	modal.close();
 });
 
@@ -147,7 +126,6 @@ events.on('busket:delete', (data: { card: IProductItem }) => {
 	orderData.removeFromBasket(card.id);
 	cardsCatalog.basketCounter = orderData.countBasketAmount();
 	basketPreview();
-	//modal.close();
 });
 
 //  Блокировать/разблокировать скролл экрана
@@ -223,9 +201,7 @@ events.on('contactsForm:submit', () => {
 	//console.log(orderArray);
 	api.createOrder(orderArray)
 	.then((result) => {
-
 		console.log(result);
-
 		success.total = result.total;
 		modal.render({
 			content: success.render({})

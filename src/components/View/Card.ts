@@ -15,16 +15,13 @@ export class Card extends Component<IProductItem> {
 	protected cardPrice: HTMLElement;
 	protected cardCategory?: HTMLElement;
 	protected cardAddToBusketButton?: HTMLButtonElement;
-	protected cardDelFromBusketButton?: HTMLButtonElement;
-	protected cardDescription?: HTMLElement;
-	protected cardBusketIndex?: HTMLElement;
 	protected cardId: string;
 
 	protected colors: IColors = {
 		'софт-скил': 'card__category card__category_soft',
-		другое: 'card__category card__category_other',
-		дополнительное: 'card__category card__category_additional',
-		кнопка: 'card__category card__category_button',
+		'другое': 'card__category card__category_other',
+		'дополнительное': 'card__category card__category_additional',
+		'кнопка': 'card__category card__category_button',
 		'хард-скил': 'card__category card__category_hard',
 	};
     
@@ -35,22 +32,8 @@ export class Card extends Component<IProductItem> {
 		this.cardImage = this.container.querySelector('.card__image');
 		this.cardCategory = this.container.querySelector('.card__category');
 		this.cardTitle = this.container.querySelector('.card__title');
-		this.cardDescription = this.container.querySelector('.card__text');	
 		this.cardPrice = this.container.querySelector('.card__price');
-		this.cardBusketIndex = this.container.querySelector('.basket__item-index');	
-		this.cardAddToBusketButton = this.container.querySelector('.button');
-		this.cardDelFromBusketButton = this.container.querySelector('.basket__item-delete');
-
-		if (this.cardAddToBusketButton) {
-			this.cardAddToBusketButton.addEventListener('click', () =>
-				this.events.emit('busket:add', { card: this }));
-		} else if (this.cardDelFromBusketButton) {
-			this.cardDelFromBusketButton.addEventListener('click', () =>
-				this.events.emit('busket:delete', { card: this }));
-		} else {
-			this.container.addEventListener('click', () =>
-				this.events.emit('card:preview', { card: this }));
-		}	
+		this.cardAddToBusketButton = null;
 	}
 
 	set id(id) {
@@ -72,27 +55,77 @@ export class Card extends Component<IProductItem> {
 	set category(value: string) {
 		this.cardCategory.textContent = value;
 		this.cardCategory.className = this.colors[value];
+	}
 
+	set image(value: string) {
+		this.cardImage.src = value;
+	}
+	
+	set inBasket(value: boolean) {
+		if (value) {
+			this.cardAddToBusketButton.disabled = !value;
+			this.cardAddToBusketButton.textContent = 'Уже в корзине';
+		} else {
+			this.cardAddToBusketButton.disabled = value;
+			this.cardAddToBusketButton.textContent = 'В корзинКу';			
+		}
+    }
+}
+
+export class CardCatalog extends Card {
+	protected cardAddToBusketButton?: HTMLButtonElement;
+	protected cardDescription?: HTMLElement;
+	protected events: IEvents;
+    
+	constructor(protected container: HTMLElement, events: IEvents) {
+		super(container, events);
+
+		this.container.addEventListener('click', () =>
+			this.events.emit('card:preview', { card: this }));
+	}
+
+}
+
+
+export class CardPreview extends Card {
+	protected cardAddToBusketButton?: HTMLButtonElement;
+	protected cardDescription?: HTMLElement;
+	protected events: IEvents;
+    
+	constructor(protected container: HTMLElement, events: IEvents) {
+		super(container, events);
+
+		this.cardDescription = this.container.querySelector('.card__text');	
+		this.cardAddToBusketButton = this.container.querySelector('.card__button');
+
+		this.cardAddToBusketButton.addEventListener('click', () =>
+			this.events.emit('busket:add', { card: this }));
 	}
 
 	set description(value: string) {
 		this.cardDescription.textContent = value;
 	}
 
-	set image(value: string) {
-		this.cardImage.src = value;
+
+}
+
+export class CardBasket extends Card {
+    protected events: IEvents;
+	protected cardDelFromBusketButton?: HTMLButtonElement;
+	protected cardBusketIndex?: HTMLElement;
+
+	constructor(protected container: HTMLElement, events: IEvents) {
+		super(container, events);
+
+		this.cardBusketIndex = this.container.querySelector('.basket__item-index');	
+		this.cardDelFromBusketButton = this.container.querySelector('.basket__item-delete');
+
+		this.cardDelFromBusketButton.addEventListener('click', () =>
+			this.events.emit('busket:delete', { card: this }));
+
 	}
 
     set busketIndex(value: number) {
-		//console.log(value);
 		this.cardBusketIndex.textContent = String(value);
     }
-
-	set inBasket(value: boolean) {
-		//console.log(value);
-		this.cardAddToBusketButton.disabled = !value;
-		this.cardAddToBusketButton.textContent = value ? 'Уже в корзине' : 'В корзину';
-		//}
-    }
-
 }
