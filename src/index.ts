@@ -2,7 +2,7 @@ import './scss/styles.scss';
 import { ProductsData } from './components/ProductsData';
 import { OrderData } from './components/OrderData';
 import { EventEmitter, IEvents } from './components/base/events';
-import { IApi, IProductItem, TContactForm, TPaymentForm } from './types';
+import { IApi, IOrder, IProductItem, TContactForm, TForm, TPaymentForm } from './types';
 import { Api } from './components/base/api';
 import { API_URL, CDN_URL, settings } from './utils/constants';
 import { testOrder01, testProductItem01, testProductsList } from './utils/constantsTest';
@@ -14,6 +14,7 @@ import { cloneTemplate, createElement } from './utils/utils';
 import { Basket } from './components/View/Basket';
 import { FormOrder } from './components/View/FormOrder';
 import { FormContacts } from './components/View/FormContacts';
+import { Success } from './components/View/Success';
 
 
 const events = new EventEmitter();
@@ -46,6 +47,7 @@ const orderData = new OrderData(events);
 const basket = new Basket(cloneTemplate(BasketTemplate), events);
 const order = new FormOrder(cloneTemplate(orderTemplate), events);
 const contacts = new FormContacts(cloneTemplate(contactsTemplate), events);
+const success = new Success(cloneTemplate(successTemplate), events);
 
 //Функции
 function getItemCard(data: { card: IProductItem }) {
@@ -154,33 +156,91 @@ events.on('modal: cardsCatalog.scrollLock', ({ lock }: { lock: boolean }) => {
 });
 
 // Изменилось состояние валидации формы
-events.on('formErrors:change', (errors: Partial<TContactForm>) => {
+events.on('contactsFormErrors:change', (errors: Partial<TContactForm>) => {
     const { email, phone } = errors;
-    order.valid = !email && !phone;
-    order.errors = Object.values({phone, email}).filter(i => !!i).join('; ');
+	console.log(email, phone);
+	contacts.valid = !email && !phone;
+	contacts.errors = Object.values({email, phone}).filter(i => !!i).join('; ');
 });
 
 // Изменилось состояние валидации формы
-events.on('formErrors:change', (errors: Partial<TPaymentForm>) => {
+events.on('orderFormErrors:change', (errors: Partial<TPaymentForm>) => {
     const { payment, address } = errors;
 	console.log(payment, address);
-    order.valid = !payment && !address;
-	console.log(order.valid);
-    order.errors = Object.values({payment, address}).filter(i => !!i).join('; ');
+	order.valid = !payment && !address;
+	order.errors = Object.values({payment, address}).filter(i => !!i).join('; ');
 });
 
-// Изменилось одно из полей
-events.on(/^order\..*:change/, (data: { field: keyof TPaymentForm, value: string }) => {
+
+// Изменилось одно из полей contactsForm
+events.on(/^contactsForm\..*:change/, (data: { field: keyof TContactForm, value: string }) => {
     orderData.setOrderField(data.field, data.value);
+	orderData.orderContactsValidation();
 });
 
-//Изменение корзины
+// Изменилось одно из полей orderForm
+events.on(/^orderForm\..*:change/, (data: { field: keyof TPaymentForm, value: string }) => {
+    orderData.setOrderField(data.field, data.value);
+	orderData.orderFormValidation();
+});
+
+//Изменение корзины (кнопка «Оформить»)
 events.on('order:open', () => {
 	modal.render({
 		content: order.render({
+			payment: '',
+			address: '',
             valid: false,
             errors: []
         })
 	});
-	orderData.checkFormFieldValidation();
+	orderData.orderFormValidation();
+});
+
+//Изменение формы (кнопка «Далее»)
+events.on('orderForm:submit', () => {
+	modal.render({
+		content: contacts.render({
+			email: '',
+			phone: '',
+            valid: false,
+            errors: []
+        })
+	});
+	orderData.orderContactsValidation();
+});
+
+//Изменение формы (кнопка «Оплатить»)
+events.on('contactsForm:submit', () => {
+	const orderArray: IOrder = {
+		payment: orderData.order.payment,
+		email: orderData.order.email,
+		phone: orderData.order.phone,
+		address: orderData.order.address,
+		total: orderData.total,
+		items: orderData.items.map(item => item.id),
+	};
+	//console.log(orderArray);
+	api.createOrder(orderArray)
+	.then((result) => {
+
+		console.log(result);
+
+		success.total = result.total;
+		modal.render({
+			content: success.render({})
+		});
+		modal.open();
+	})
+	.catch((err) => {
+		console.error('Ошибка при отправке заказа:', err);
+	});
+});
+
+events.on('success: submit', () => {
+	orderData.clearOrder();
+	orderData.clearBasket();
+	orderData.count
+	modal.close();
+	cardsCatalog.basketCounter = orderData.countBasketAmount();
 });

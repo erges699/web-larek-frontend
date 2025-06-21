@@ -1,113 +1,120 @@
 //import validate from "validate.js";
-import { IProductItem, PaymentMethod, TOrder, TContactForm, IOrderData, TFormErrors } from '../types';
+import { IProductItem, PaymentMethod, TOrder, IOrderData, TFormErrors } from '../types';
 import { IEvents } from './base/events';
 //import { constraintsContacts } from '../utils/constants';
 
 export class OrderData implements IOrderData {
-  protected _items: IProductItem[] = [];
-  protected _total: number | null;
-  protected _count: number;
-  protected _order: TOrder;
-  protected events: IEvents;
-  formErrors: TFormErrors;
-
-  constructor(events: IEvents) {
-    this.events = events;
-  }
-
-  get items() {
-    return this._items;
-  }
-
-  get total() {
-    return this._total;
-  }
-
-  get count() {
-    return this._count;
-  }
-
-  get order() {
-    return this._order;
-  }
-
-  isInBasket(itemId: string) {
-    return this._items.some(item => item.id === itemId);
-  }
-
-  addToBasket(item: IProductItem) {
-    this._items.push(item);
-    this.events.emit('basket:added');
-    }
-
-  removeFromBasket(productId: string) {
-    this._items = this._items.filter((item) => item.id !== productId);
-    this.events.emit('basket:removed');
-    }
-
-  clearBasket() {
-    this._items = [];
-    this.events.emit('basket:cleared');
-    }
-
-  countPrices() {
-    return this._total = this._items.reduce((sum, item) => sum + (item.price || 0), 0);
-
-  }
-
-  countBasketAmount(){
-    return this._count = this._items.length;
-  }
-
-  setPayment(method: PaymentMethod) {
-    this._order.payment = method;
-  }
-
-  setOrderField(field: keyof TOrder, value: string) {
-    if (field === 'payment') {
-      this.setPayment(value as PaymentMethod);
-    } else {
-      this._order[field] = value;
-    }
-  }
-
-  clearOrder() {
-    this._order = {
+    protected _items: IProductItem[] = [];
+    protected _total: number | null;
+    protected _count: number;
+    protected _order: TOrder = {
+      payment: '',
+      address: '',
       email: '',
       phone: '',
-      address: '',
-      payment: 'card',
     };
-  }
+    protected events: IEvents;
+    formErrors: TFormErrors = {};
 
-  createOrderToPost() {
-    this.events.emit('order:submit', this._order);
+    constructor(events: IEvents) {
+        this.events = events;
     }
 
-  checkFormFieldValidation() {
-    const errors: typeof this.formErrors = {
-      payment: "",
-      address: "",
-      email: "",
-      phone: ""
-    };
-
-    if (!this._order.address) {
-      errors.address = 'Некорректный адрес';
+    get items() {
+        return this._items;
     }
 
-    if (!this._order.email) {
-      errors.email = 'Некорректный адрес эл.почты';
+    get total() {
+        return this._total;
     }
 
-    if (!this._order.phone) {
-      errors.phone = 'Некорректный номер телефона';
+    get count() {
+        return this._count;
     }
 
-    this.formErrors = errors;
-    this.events.emit('order:changed', this.formErrors);
+    get order() {
+        return this._order;
+    }
 
-    return Object.keys(errors).length === 0;
-  }
+    isInBasket(itemId: string) {
+        return this._items.some(item => item.id === itemId);
+    }
+
+    addToBasket(item: IProductItem) {
+        this._items.push(item);
+        this.events.emit('basket:added');
+      }
+
+    removeFromBasket(productId: string) {
+        this._items = this._items.filter((item) => item.id !== productId);
+        this.events.emit('basket:removed');
+      }
+
+    clearBasket() {
+        this._items = [];
+        this.events.emit('basket:cleared');
+      }
+
+    countPrices() {
+        return this._total = this._items.reduce((sum, item) => sum + (item.price || 0), 0);
+
+    }
+
+    countBasketAmount(){
+        return this._count = this._items.length;
+    }
+
+    setPayment(method: PaymentMethod) {
+        this._order.payment = method;
+    }
+
+    setOrderField(field: keyof TOrder, value: string) {
+        if (field === 'payment') {
+          this.setPayment(value as PaymentMethod);
+        } else {
+          this._order[field] = value;
+        }
+    }
+
+    clearOrder() {
+      this._order = {
+        email: '',
+        phone: '',
+        address: '',
+        payment: '',
+      };
+    }
+
+    orderContactsValidation() {
+        const errors: typeof this.formErrors = {};
+
+        if (!this._order.email) {
+          errors.email = 'Некорректный адрес эл.почты';
+        }
+
+        if (!this._order.phone) {
+          errors.phone = 'Некорректный номер телефона';
+        }
+
+        this.formErrors = errors;
+        this.events.emit('contactsFormErrors:change', this.formErrors);
+        return Object.keys(errors).length === 0;
+    }
+
+    orderFormValidation() {
+        const errors: typeof this.formErrors = {};
+
+        if (!this._order.address) {
+          errors.address = 'Некорректный адрес';
+        }
+
+        if (!this._order.payment) {
+          errors.payment = 'Некорректный тип платежа';
+        }
+
+        this.formErrors = errors;
+        this.events.emit('orderFormErrors:change', this.formErrors);
+        return Object.keys(errors).length === 0;    
+    }
 
 }

@@ -23,7 +23,7 @@ export class FormOrder extends Form<TPaymentForm> {
             this.cardButton.classList.add('button_alt-active');
             this.paymentMethod = 'card';
             this.events.emit(
-                `form: ${this.formName}.change`,
+                `${this.formName}.payment:change`,
                 { field: 'payment', value: this.paymentMethod }
             );
         });
@@ -33,7 +33,7 @@ export class FormOrder extends Form<TPaymentForm> {
             this.cashButton.classList.add('button_alt-active');
             this.paymentMethod = 'cash';
             this.events.emit(
-                `form: ${this.formName}.change`,
+                `${this.formName}.payment:change`,
                 { field: 'payment', value: this.paymentMethod }
             );
         });

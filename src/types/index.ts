@@ -1,12 +1,12 @@
 export interface IProductItem {
-  id: string;
-  description: string;
-  image: string;
-  title: string;
-  category: string;
-  price: number | null;
-  busketIndex: number;
-  inBusket: boolean;
+	id: string;
+	description: string;
+	image: string;
+	title: string;
+	category: string;
+	price: number | null;
+	busketIndex: number;
+	inBusket: boolean;
 }
 
 export type PaymentMethod = 'cash' | 'card';
@@ -42,10 +42,10 @@ export interface IOrderData {
 	clearBasket(): void;
 	countPrices(): number; 
 	countBasketAmount(): number;
-	createOrderToPost(): void;
 	setOrderField(field: keyof TOrder, value: string): void;
 	clearOrder(): void;
-	checkFormFieldValidation(): boolean;
+	orderContactsValidation(): boolean;
+	orderFormValidation(): boolean;
 }
 
 export type TOrder = Omit<IOrder, 'id' | 'items' | 'total'>;
@@ -54,7 +54,10 @@ export type TPaymentForm = Pick<IOrder, 'payment' | 'address'>;
 
 export type TContactForm = Pick<IOrder, 'email' | 'phone'>;
 
-export type TFormErrors = Record<keyof TPaymentForm | keyof TContactForm, string>;
+export type TForm = Pick<IOrder, 'email' | 'phone' | 'payment' | 'address'>;
+
+//export type TFormErrors = Record<keyof TPaymentForm | keyof TContactForm, string>;
+export type TFormErrors = Partial<Record<keyof IOrder, string>>;
 
 export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 

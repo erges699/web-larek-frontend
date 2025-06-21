@@ -41,12 +41,12 @@ export class Form<T> extends Component<IFormState> {
     }
     
     set valid(value: boolean) {
-        console.log(`${this.formName}: order: валидация — Valid:`, value);
+        //console.log(`${this.formName}: order: валидация — Valid:`, value);
         this.formSubmit.disabled = !value;
     }
 
     set errors(value: string) {
-        console.log(`${this.formName}: ошибочки:`, value);
+        //console.log(`${this.formName}: ошибочки:`, value);
         this.setText(this.formErrors, value);
     }
 

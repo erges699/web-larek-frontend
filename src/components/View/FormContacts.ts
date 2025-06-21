@@ -17,12 +17,12 @@ export class FormContacts extends Form<TContactForm> {
     }
 
 	set email(value: string) {
-        console.log('formContacts: email =', value);
+        //console.log('formContacts: email =', value);
         this.emailInput.value = value;
 	}
 
 	set phone(value: string) {
-        console.log('formContacts: phone =', value);
+        //console.log('formContacts: phone =', value);
         this.phoneInput.value = value;
 	}
 }
