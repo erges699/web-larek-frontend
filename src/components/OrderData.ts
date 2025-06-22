@@ -42,22 +42,21 @@ export class OrderData implements IOrderData {
 
     addToBasket(item: IProductItem) {
         this._items.push(item);
-        this.events.emit('basket:added');
+        this.events.emit('basket:changed');
       }
 
     removeFromBasket(productId: string) {
         this._items = this._items.filter((item) => item.id !== productId);
-        this.events.emit('basket:removed');
+        this.events.emit('basket:changed');
       }
 
     clearBasket() {
         this._items = [];
-        this.events.emit('basket:cleared');
+        this.events.emit('basket:changed');
       }
 
     countPrices() {
         return this._total = this._items.reduce((sum, item) => sum + (item.price || 0), 0);
-
     }
 
     countBasketAmount(){

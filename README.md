@@ -46,21 +46,14 @@ yarn build
 
 ```typescript
 interface IProductItem {
-  id: string;
-  description: string;
-  image: string;
-  title: string;
-  category: string;
-  price: number | null;
-}
-```
-
-Корзина
-
-```typescript
-interface IBasket {
-	items: string[];
-	total: number;
+	id: string;
+	description: string;
+	image: string;
+	title: string;
+	category: string;
+	price: number | null;
+	busketIndex: number;
+	inBusket: boolean;
 }
 ```
 
@@ -74,12 +67,13 @@ type PaymentMethod = 'cash' | 'card'
 
 ```typescript
 interface IOrder {
-	payment: PaymentMethod;
+	payment: string;
 	email: string;
 	phone: string;
 	address: string;
 	total: number;
 	items: string[];
+	id?: string;
 }
 ```
 
@@ -87,7 +81,7 @@ interface IOrder {
 
 ```typescript
 export interface IOrderResult {
-	id: string;
+	id?: string;
 	total: number;
 }
 ```
@@ -106,23 +100,26 @@ interface IProductsData {
 
 ```typescript
 interface IOrderData {
-	basket: IBasket;
+	items: 	IProductItem[];
+	total: number | null;
 	order: TOrder;
-	isInBasket(item: IProductItem): IProductItem;
+	isInBasket(itemId: string): boolean;
 	addToBasket(item: IProductItem): void;
-	removeFromBasket(item: IProductItem): void;
+	removeFromBasket(productId: string): void;
 	clearBasket(): void;
-	setOrderPayment(method: PaymentMethod): void;
+	countPrices(): number; 
+	countBasketAmount(): number;
+	setOrderField(field: keyof TOrder, value: string): void;
 	clearOrder(): void;
-	checkPaymentValidation(data: Record<keyof TPaymentForm, string>): boolean;
-	checkContactValidation(data: Record<keyof TContactForm, string>): boolean;
+	orderContactsValidation(): boolean;
+	orderFormValidation(): boolean;
 }
 ```
 
 Заказ
 
 ```typescript
-export type TOrder = Omit<IOrder, 'items' | 'total'>;
+export type TOrder = Omit<IOrder, 'id' | 'items' | 'total'>;
 ```
 
 Форма выбора способа оплаты и ввода адреса доставки
@@ -135,6 +132,25 @@ type TPaymentForm = Pick<IOrder, 'payment' | 'address'>;
 
 ```typescript
 type TContactForm = Pick<IOrder, 'email' | 'phone'>;
+```
+
+Данные для заказа в корзине
+
+```typescript
+export type TForm = Pick<IOrder, 'email' | 'phone' | 'payment' | 'address'>;
+```
+
+```typescript
+type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
+```
+
+
+```typescript
+interface IApi {
+    baseUrl: string;
+    get<T>(uri: string): Promise<T>;
+    post<T>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
+}
 ```
 
 ## Архитектура приложения
@@ -174,7 +190,6 @@ type TContactForm = Pick<IOrder, 'email' | 'phone'>;
 Конструктор класса принимает инстант брокера событий.\
 В полях класса хранятся следующие данные:
 - `items: IProductItem[]` — массив объектов товаров;
-- `preview: string | null` — id товара, выбранного для просмотра в модальном окне;
 
 Класс предоставляет набор методов для взаимодействия с этими данными:
 
@@ -190,41 +205,57 @@ type TContactForm = Pick<IOrder, 'email' | 'phone'>;
 
 Класс предоставляет набор методов для взаимодействия с этими данными:
 
-- `isInBasket(item: IProductItem): boolean` — для проверки есть ли товар в корзине;
+- `isInBasket(itemId: string): boolean` — для проверки есть ли товар в корзине;
 - `addToBasket(item: IProductItem): void` — добавляет товар в корзину;
-- `removeFromBasket(item: IProductItem): void` — удаляет товар из корзины;
+- `removeFromBasket(productId: string): void` — удаляет товар из корзины;
 - `clearBasket(): void` — очищает корзину;
-- `createOrderToPost(): IOrder` — создаёт полный заказ для отправки на сервер (берёт данные из basket и order);
-- `setOrderField(): void` — устанавливает поле формы;
+- `countPrices(): number`; 
+- `countBasketAmount(): number`;
+- `setOrderField(field: keyof TOrder, value: string): void`— устанавливает поле формы;
 - `clearOrder(): void` — очищает заказ;
-- `checkFormFieldValidation(): boolean` — проверяет данные поля формы после ввода на валидность;
+- `orderContactsValidation(): boolean`— проверяет данные поля формы контактов после ввода на валидность;
+- `orderFormValidation(): boolean`— проверяет данные поля формы заказа после ввода на валидность;
 
 ### Слой представления
 Все классы представления отвечают за отображение внутри контейнера (DOM-элемент) передаваемых в них данных.
 
 #### Класс `Card`
-Отвечает за отображение карточки, задавая в карточке данные названия, изображения, количества лайков, наличия лайка текущего пользователя. Класс используется для отображения карточек на странице сайта. В конструктор класса передается DOM элемент темплейта, что позволяет при необходимости формировать карточки разных вариантов верстки. В классе устанавливаются слушатели на все интерактивные элементы, в результате взаимодействия с которыми пользователя генерируются соответствующие события.\
+Отвечает за отображение карточки, задавая в карточке данные названия, изображения, описания, цены. Класс используется для отображения карточек на странице сайта. В конструктор класса передается DOM элемент темплейта, что позволяет при необходимости формировать карточки разных вариантов верстки. В классе устанавливаются слушатели на все интерактивные элементы, в результате взаимодействия с которыми пользователя генерируются соответствующие события.\
 Поля класса содержат элементы разметки элементов карточки. Конструктор, кроме темплейта принимает экземпляр `EventEmitter` для инициации событий.\
+Общий класс, от него наследуются классы:
+- CardCatalog
+- CardPreview
+- CardBasket
+
 Методы:
-- `render(cardData: Partial<ICard>, userId: string): HTMLElement` — заполняет атрибуты элементов карточки данными, а так-же управляет отображением корзины удаления на основании данных о текущем пользователе. Корзина удаления будет отображаться только если создатель карточки текущий пользователь. Метод возвращает разметку карточки с установленными слушателями. Слушатели устанавливаются на все интерактивные элементы карточки и генерируют соответствующие события через экземпляр брокера событий.
-- `isLiked(): boolean` — метод возвращает наличие на карточке лайка текущего пользователя
-- `deleteCard(): void` — метод для удаления разметки карточки
-- геттер _id возвращает уникальный id карточки
+- геттер `id` возвращает уникальный id карточки;
+- сеттеры `id`, `title(value: string)`, `price(value: number | null)`, `category(value: string)`, `image(value: string)`, `inBasket(value: boolean)` —
+устанавливают id карточки, заголовок, цену, категорию, изображение, наличие карточки в корзине.
 
-#### Класс `CardsContainer`
-Отвечает за отображение блока с карточками на главной странице. Предоставляет метод `addCard(cardElement: HTMLElement)` для добавления карточек на страницу и сеттер `container` для полного обновления содержимого. В конструктор принимает контейнер, в котором размещаются карточки.
+#### Класс `CardCatalog`
+Отвечает за отображение списка карточек.
+В классе устанавливается слушатель на открытие предпросмотра выбранной карточки.\
 
-Поля класса
+#### Класс `CardPreview`
+Отвечает за отображение выбранной карточки.
+В классе устанавливается слушатель на добавление карточки в корзину.\
+Методы:
+- сеттеры `description(value: string)`, `price(value: number | null)`, `cardToBusketButtonText(value: string)`, `cardToBusketButtonDisable(value: boolean)`
+устанавливают описание карточки, цену (блокируется кнопка добавления в корзину бесценного товара), текст кнопки, блокировку кнопки при наличии товара в корзине.
 
-- `container: HTMLElement` — основной контейнер страницы
-- `cardGallery: HTMLElement` — контейнер для галереи товаров
-- `cartButton: HTMLElement` — кнопка корзины
-- `cartCounter: HTMLElement` — счетчик товаров в корзине
+#### Класс `CardBasket`
+Отвечает за отображение корзины.
+В классе устанавливается слушатель на удаление карточки из корзины.\
+Методы:
+- сеттер `busketIndex(value: number)` устанавливает индекс товара в корзине.
 
-Методы класса
+#### Класс `CardsCatalog`
+Отвечает за отображение блока с карточками на главной странице. Предоставляет сеттеры: 
+- `catalog` — для полного обновления содержимого;
+- `basketCounter(count: number)` — счетчик корзины;
+- `scrollLock(value: boolean)` — блокировка скроллинга при открытом модальном окне.
+В конструктор принимает контейнер, в котором размещаются карточки.
 
-- `render(items: HTMLElement[]): void` — отрисовка галереи товаров из готовых карточек
-- `updateBasketCounter(count: number): void` — обновление счетчика корзины
 
 #### Класс `Modal`
 Реализует модальное окно. Так же предоставляет методы `open` и `close` для управления отображением модального окна. Устанавливает слушатели на клавиатуру, для закрытия модального окна по Esc, на клик в оверлей и кнопку-крестик для закрытия попапа.  
@@ -238,36 +269,19 @@ type TContactForm = Pick<IOrder, 'email' | 'phone'>;
 #### Класс `Success`
 
 Компонент для отображения окна с уведомлением об успешном оформлении заказа.\
-Конструктор класса принимает инстант брокера событий\
+Конструктор класса принимает инстант брокера событий, контейнер для содержимого\
 
 Поля класса
-- modal: HTMLElement - элемент модального окна
+
 - events: IEvents - брокер событий
-- container: HTMLElement — контейнер окна
-- sumElement: HTMLElement — элемент для отображения суммы списанных средств
-- closeButton: HTMLButtonElement — кнопка возврата на главный экран
+- successTitle: HTMLElement — элемент для отображения заголовка;
+- successDescription: HTMLElement — элемент для отображения суммы списанных средств;
+- successButton: HTMLButtonElement — кнопка возврата на главный экран
 
 Методы класса 
 
-- render(sum: number): void — отображение сообщения об успеном оформлении заказа и суммы списанных средств
+- сеттер `total(value: number)` — отображение сообщения о сумме списанных средств
 
-#### Класс `CardPreview`
-
-Компонент для отображения превью карточки товара.\
-Конструктор класса принимает инстант брокера событий\
-
-Поля класса 
-
-Методы класса 
-
-#### Класс `CardBasket`
-
-Компонент для отображения карточки товара в корзине.\
-Конструктор класса принимает инстант брокера событий\
-
-Поля класса 
-
-Методы класса 
 
 #### Класс `Basket`
 
@@ -275,13 +289,15 @@ type TContactForm = Pick<IOrder, 'email' | 'phone'>;
 Конструктор класса принимает инстант брокера событий\
 
 Поля класса 
-- items: HTMLElement - контейнер для списка товаров
-- total: HTMLElement - элемент с общей стоимостью
-- button: HTMLButtonElement - кнопка оформления заказа
+- `events: IEvents` — брокер событий 
+- `items: HTMLElement` — контейнер для списка товаров
+- `busketPrice: HTMLElement` — элемент с общей стоимостью
+- `busketButton: HTMLButtonElement` — кнопка оформления заказа
 
 Методы класса 
-- render(): void - перерисовка корзины
-- updateOrderButton(canOrder: boolean): void - обновление состояния кнопки заказа
+Сеттеры
+- `items(items: HTMLElement[])` - отображение корзины
+- `total(total: number)` - обновление суммы заказа
 
 #### Класс `FormOrder`
 
@@ -289,14 +305,15 @@ type TContactForm = Pick<IOrder, 'email' | 'phone'>;
 Конструктор класса принимает инстант брокера событий.\
 
 Поля класса 
-- paymentOnlineButton: HTMLButtonElement — кнопка выбора оплаты "Онлайн"
-- paymentReceiptButton: HTMLButtonElement — кнопка выбора оплаты "При получении"
-- addressInput: HTMLInputElement — поле для ввода адреса
+- `events: IEvents` — брокер событий 
+- `cashButton: HTMLButtonElement` — кнопка выбора оплаты "Онлайн"
+- `cardButton: HTMLButtonElement` — кнопка выбора оплаты "При получении"
+- `addressInput: HTMLInputElement` — поле для ввода адреса
 
 Методы класса 
 
-- setPayment(type: string): void — установка способа оплаты
-- setAddress(address: string): void — установка адреса доставки
+- `payment(method: PaymentMethod)` — установка способа оплаты
+- `address(value: string)` — установка адреса доставки
 
 #### Класс `FormContacts`
 
@@ -304,14 +321,33 @@ type TContactForm = Pick<IOrder, 'email' | 'phone'>;
 Конструктор класса принимает инстант брокера событий.\
 
 Поля класса 
-- emailInput: HTMLInputElement — поле для email
-- phoneInput: HTMLInputElement — поле для телефона
+- `events: IEvents` — брокер событий 
+- `emailInput: HTMLInputElement` — поле для email
+- `phoneInput: HTMLInputElement` — поле для телефона
 
 Методы класса 
-- setEmail(email: string): void — установка email
-- setPhone(phone: string): void — установка телефона
+- `email(value: string)` — установка email
+- `phone(value: string)` — установка телефона
 
 ### Слой коммуникации
 
 #### Класс `AppApi`
 Принимает в конструктор экземпляр класса Api и предоставляет методы реализующие взаимодействие с бэкендом сервиса.
+
+- `getProductList(): Promise<IProductItem[]>` — получает с сервера все карточки
+- `getProduct(productId: string): Promise<IProductItem` - получает данные одной карточки
+- `createOrder(order: IOrder): Promise<IOrderResult>` — отправляет на сервер данные заказа и получает потдверждение этого заказа
+
+### События, возникающие при взаимодействии пользователя с интерфейсом (генерируются классами, отвечающими за представление)
+- `contactsForm:submit` — изменение формы (кнопка «Оплатить»)
+- `orderForm:submit` — изменение формы (кнопка «Далее»)
+- `order:open` — изменение корзины (кнопка «Оформить»)
+- `orderFormErrors:change` — изменилось состояние валидации формы
+- `contactsFormErrors:change` — изменилось состояние валидации формы
+- `modal: open`, `modal: close` — локировать/разблокировать скролл экрана
+- `busket:deleteCard` — удалить из корзины (в корзине)
+- `busket:addCard` — добавить в корзину (предпросмотр карточки)
+- `basket:changed` — изменения в корзине
+- `basket:open` — открытие корзины
+- `card:preview` — вывод выбранной карточки в модальном окне
+- `initialData:loaded` — вывод карточек на главном экране

@@ -2,15 +2,14 @@ import './scss/styles.scss';
 import { ProductsData } from './components/ProductsData';
 import { OrderData } from './components/OrderData';
 import { EventEmitter, IEvents } from './components/base/events';
-import { IApi, IOrder, IProductItem, TContactForm, TForm, TPaymentForm } from './types';
+import { IApi, IOrder, IProductItem, TContactForm, TPaymentForm } from './types';
 import { Api } from './components/base/api';
 import { API_URL, CDN_URL, settings } from './utils/constants';
-import { testOrder01, testProductItem01, testProductsList } from './utils/constantsTest';
 import { AppAPI } from './components/AppApi';
 import { CardBasket, CardCatalog, CardPreview } from './components/View/Card';
 import { Modal } from './components/View/Modal';
 import { CardsCatalog } from './components/View/CardsCatalog';
-import { cloneTemplate, createElement } from './utils/utils';
+import { cloneTemplate } from './utils/utils';
 import { Basket } from './components/View/Basket';
 import { FormOrder } from './components/View/FormOrder';
 import { FormContacts } from './components/View/FormContacts';
@@ -54,29 +53,18 @@ function getItemCard(data: { card: IProductItem }) {
 	const { card } = data;
 	const itemCard = productsData.getProduct(card.id);
 	itemCard.inBusket = orderData.isInBasket(itemCard.id);
-	console.log(itemCard);
 	return itemCard;
 }
 
-function basketPreview() {
-	const cardsArray = orderData.items.map((item, index) => {
-		const cardInstant = new CardBasket(cloneTemplate(cardBasketTemplate), events);
-		return cardInstant.render({
-			id: item.id,
-			title: item.title, 
-			price: item.price,
-			busketIndex: index + 1,
-		});
-	});	
-	modal.render({
-		content: basket.render({items: cardsArray, total: orderData.countPrices()}),
-	});		
-}
-
 function cardPreview(data: { card: IProductItem }) {
-	const cardPreview = new CardPreview(cloneTemplate(productTemplate), events);
+	const card = getItemCard(data);
+	const cardForPreview = new CardPreview(cloneTemplate(productTemplate), events);
+
+	cardForPreview.cardToBusketButtonText = (card.inBusket ? 'Уже в корзине' : 'В корзину');
+	cardForPreview.cardToBusketButtonDisable = (card.inBusket ? true : false);
+
 	modal.render({
-		content: cardPreview.render(getItemCard(data)),
+		content: cardForPreview.render(card),
 	});	
 }
 
@@ -91,7 +79,7 @@ Promise.all([api.getProductList()])
 	});
 
 	
-//вывод карточек на главном экране
+//Вывод карточек на главном экране
 events.on('initialData:loaded', () => {
 	cardsCatalog.basketCounter = orderData.items.length;
 	const cardsArray = productsData.items.map((card) => {
@@ -101,7 +89,7 @@ events.on('initialData:loaded', () => {
 	cardsCatalog.render({ catalog: cardsArray });
 });
 
-// вывод выбранной карточки в модальном окне
+//Вывод выбранной карточки в модальном окне
 events.on('card:preview', (data: { card: IProductItem }) => {
 	cardPreview(data);
 	modal.open();
@@ -109,28 +97,49 @@ events.on('card:preview', (data: { card: IProductItem }) => {
 
 //Открытие корзины
 events.on('basket:open', () => {
-	basketPreview();
+	modal.render({
+		content: basket.render(),
+	});
 	modal.open();
 });
 
+//Изменения в корзине
+events.on('basket:changed', () => {
+	cardsCatalog.basketCounter = orderData.countBasketAmount();
+	const cardsArray = orderData.items.map((item, index) => {
+		const cardInstant = new CardBasket(cloneTemplate(cardBasketTemplate), events);
+		return cardInstant.render({
+			id: item.id,
+			title: item.title, 
+			price: item.price,
+			busketIndex: index + 1,
+		});
+	});	
+	basket.render({items: cardsArray, total: orderData.countPrices()});	
+});
+
 //Добавить в корзину (предпросмотр карточки)
-events.on('busket:add', (data: { card: IProductItem }) => {
+events.on('busket:addCard', (data: { card: IProductItem }) => {
 	orderData.addToBasket(getItemCard(data));
 	cardsCatalog.basketCounter = orderData.countBasketAmount();
 	modal.close();
 });
 
 //Удалить из корзины (в корзине)
-events.on('busket:delete', (data: { card: IProductItem }) => {
+events.on('busket:deleteCard', (data: { card: IProductItem }) => {
 	const { card } = data;
 	orderData.removeFromBasket(card.id);
 	cardsCatalog.basketCounter = orderData.countBasketAmount();
-	basketPreview();
 });
 
 //  Блокировать/разблокировать скролл экрана
-events.on('modal: cardsCatalog.scrollLock', ({ lock }: { lock: boolean }) => {
-	cardsCatalog.scrollLock = lock;
+events.on('modal: open', () => {
+	cardsCatalog.scrollLock = true;
+});
+
+//  Блокировать/разблокировать скролл экрана
+events.on('modal: close', () => {
+	cardsCatalog.scrollLock = false;
 });
 
 // Изменилось состояние валидации формы

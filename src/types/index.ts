@@ -28,7 +28,6 @@ export interface IOrderResult {
 
 export interface IProductsData {
 	items: 	IProductItem[];
-	preview: string | null;
 	getProduct(productId: string): IProductItem;
 }
 
